@@ -1,6 +1,6 @@
-# Ultima-like RPG
+# Mystic Isle Adventure
 
-ブラウザで動作する探索型RPG。Ultima シリーズにインスパイアされた、リソース管理とターン制戦闘を特徴とする2Dトップダウンアドベンチャーゲームです。
+ブラウザで動作する探索型RPG。神秘的な島を舞台に、リソース管理とターン制戦闘を特徴とする2Dトップダウンアドベンチャーゲームです。
 
 ## 目次
 
@@ -35,7 +35,7 @@
 
 以下のリンクからブラウザでアクセスするだけでプレイできます：
 
-**🎮 ゲームリンク**: https://shioa2006-game.github.io/ultima-like-rpg/
+**🎮 ゲームリンク**: https://shioa2006-game.github.io/mystic-isle-adventure/
 
 ### 必要要件
 - モダンブラウザ（Chrome、Firefox、Safari、Edge等）
