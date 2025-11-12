@@ -8,6 +8,9 @@
 
   function handleInput(type, keyValue, keyCode) {
     switch (type) {
+      case Game.ui.OVERLAY.TITLE:
+        handleTitleOverlayInput(keyValue, keyCode);
+        break;
       case Game.ui.OVERLAY.SHOP:
         Game.shop.handleInput(keyValue, keyCode);
         break;
@@ -22,6 +25,13 @@
         break;
       default:
         break;
+    }
+  }
+
+  function handleTitleOverlayInput(keyValue, keyCode) {
+    if (keyCode === window.ENTER) {
+      Game.ui.close();
+      Game.startGame();
     }
   }
 

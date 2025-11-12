@@ -95,6 +95,7 @@
   });
 
   const OVERLAY = Object.freeze({
+    TITLE: "TITLE",
     SHOP: "SHOP",
     INVENTORY: "INVENTORY",
     STATUS: "STATUS",

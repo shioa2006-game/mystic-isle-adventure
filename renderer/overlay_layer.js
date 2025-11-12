@@ -8,6 +8,9 @@
     const overlay = Game.ui.state.overlay;
     if (!overlay) return;
     switch (overlay) {
+      case Game.ui.OVERLAY.TITLE:
+        drawTitleOverlay(p);
+        break;
       case Game.ui.OVERLAY.SHOP:
         drawShopOverlay(p);
         break;
@@ -198,6 +201,20 @@
     p.fill(isLowHp ? p.color(255, 100, 100) : 255);
     p.text(`プレイヤーHP: ${player.hp}/${player.maxHp}`, textX, overlayArea.y + 96);
     p.fill(255);
+  }
+
+  function drawTitleOverlay(p = window) {
+    p.push();
+    p.noStroke();
+    p.fill(0, 230);
+    p.rect(0, 0, Game.config.canvasWidth, Game.config.canvasHeight);
+    p.fill(255);
+    p.textAlign(p.CENTER, p.CENTER);
+    p.textSize(48);
+    p.text("Mystic Isle Adventure", Game.config.canvasWidth / 2, Game.config.canvasHeight / 2 - 40);
+    p.textSize(20);
+    p.text("Press ENTER to start", Game.config.canvasWidth / 2, Game.config.canvasHeight / 2 + 40);
+    p.pop();
   }
 
   function drawClearOverlay(p = window) {

@@ -205,10 +205,16 @@
   }
 
    function initializeGame() {
-     resetForNewGame();
+     resetGameState();
+     Game.ui.open(Game.ui.OVERLAY.TITLE);
    }
 
-  function resetForNewGame() {
+   function startGame() {
+     resetGameState();
+     Game.pushMessage("島へようこそ。探索を始めよう。");
+   }
+
+  function resetGameState() {
     PlayerState.resetProgressFlags(progressFlags);
     state.scene = SCENE.FIELD;
     state.walkCounter = 0;
@@ -229,7 +235,6 @@
      } else {
        setPlayerPosition({ x: 0, y: 0 });
      }
-     pushMessage("島へようこそ。探索を始めよう。");
      markOccupancyDirty();
      if (Game.entities && typeof Game.entities.spawnInitialEnemies === "function") {
        Game.entities.spawnInitialEnemies();
@@ -238,6 +243,11 @@
      }
      ensureOccupancy();
    }
+
+  function resetForNewGame() {
+    resetGameState();
+    Game.ui.open(Game.ui.OVERLAY.TITLE);
+  }
 
    function resetBattleState() {
      battleState.active = false;
@@ -394,6 +404,7 @@
    Game.getCurrentMap = getCurrentMap;
    Game.switchScene = switchScene;
    Game.initializeGame = initializeGame;
+   Game.startGame = startGame;
    Game.addItem = addItem;
    Game.removeItemByIndex = removeItemByIndex;
    Game.describeItem = describeItem;
