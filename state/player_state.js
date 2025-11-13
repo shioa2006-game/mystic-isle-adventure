@@ -335,7 +335,7 @@
       }
       leveled = true;
       if (typeof pushMessage === "function") {
-        pushMessage(`レベル ${player.lv} に上がった！`);
+        pushMessage({ text: `レベル ${player.lv} に上がった！` });
       }
     }
     return leveled;

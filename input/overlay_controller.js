@@ -8,6 +8,9 @@
 
   function handleInput(type, keyValue, keyCode) {
     switch (type) {
+      case Game.ui.OVERLAY.TITLE:
+        handleTitleOverlayInput(keyValue, keyCode);
+        break;
       case Game.ui.OVERLAY.SHOP:
         Game.shop.handleInput(keyValue, keyCode);
         break;
@@ -22,6 +25,13 @@
         break;
       default:
         break;
+    }
+  }
+
+  function handleTitleOverlayInput(keyValue, keyCode) {
+    if (keyCode === window.ENTER) {
+      Game.ui.close();
+      Game.startGame();
     }
   }
 
@@ -76,7 +86,7 @@
   function useSelectedInventoryItem() {
     const inventory = Game.state.player.inventory;
     if (!inventory.length) {
-      Game.pushMessage("所持品は空だ。");
+      Game.pushMessage({ text: "所持品は空だ。" });
       return;
     }
     const index = Game.utils.clamp(
@@ -85,7 +95,7 @@
       Math.max(0, inventory.length - 1)
     );
     const result = Game.useItemByIndex(index);
-    Game.pushMessage(result.message);
+    Game.pushMessage({ text: result.message });
     if (result.success && result.consumed) {
       const nextLength = Game.state.player.inventory.length;
       if (nextLength === 0) {
@@ -100,7 +110,7 @@
   function describeSelectedItem() {
     const inventory = Game.state.player.inventory;
     if (!inventory.length) {
-      Game.pushMessage("所持品は空だ。");
+      Game.pushMessage({ text: "所持品は空だ。" });
       return;
     }
     const index = Game.utils.clamp(
@@ -109,7 +119,7 @@
       Math.max(0, inventory.length - 1)
     );
     const itemId = inventory[index];
-    Game.pushMessage(Game.describeItem(itemId));
+    Game.pushMessage({ text: Game.describeItem(itemId) });
   }
 
   Game.controllers = Game.controllers || {};

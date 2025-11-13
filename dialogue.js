@@ -177,6 +177,8 @@
     session.index += 1;
     // 空文字列も含めてすべてのメッセージを表示（空行も表示される）
     if (typeof line === "string") {
+      Game.pushMessage({ text: line });
+    } else if (line) {
       Game.pushMessage(line);
     }
     if (session.index >= session.lines.length) {
@@ -210,7 +212,7 @@
   }
 
   function pushFallbackMessage() {
-    Game.pushMessage("特に反応がない。");
+    Game.pushMessage({ text: "特に反応がない。" });
   }
 
   function getCurrentPhase() {

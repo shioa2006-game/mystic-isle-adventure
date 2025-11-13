@@ -53,7 +53,7 @@
     const state = Game.state;
     const next = { x: state.playerPos.x + dx, y: state.playerPos.y + dy };
     if (!isInsideGrid(next)) {
-      Game.pushMessage("これ以上進めない。");
+        Game.pushMessage({ text: "これ以上進めない。" });
       return;
     }
     Game.occupancy.ensure();
@@ -64,7 +64,7 @@
       } else if (moveCheck.warp && moveCheck.warpData) {
         Game.occupancy.resolveTileEvent(next.x, next.y);
       } else {
-        Game.pushMessage("そこには進めない。");
+        Game.pushMessage({ text: "そこには進めない。" });
       }
       return;
     }
@@ -94,19 +94,19 @@
     if (state.player.food > 0 && state.walkCounter % 2 === 0) {
       state.player.food = Math.max(0, state.player.food - 1);
       if (state.player.food === 0) {
-        Game.pushMessage("Food が尽きた。");
+        Game.pushMessage({ text: "Food が尽きた。" });
       }
     }
     if (state.player.food === 0) {
       if (starvingBefore) {
         state.player.hp = Math.max(0, state.player.hp - 1);
-        Game.pushMessage("飢えで HP が減った。");
+        Game.pushMessage({ text: "飢えで HP が減った。" });
         if (state.player.hp === 0) {
-          Game.pushMessage("力尽きてしまった…");
+          Game.pushMessage({ text: "力尽きてしまった…" });
           Game.resetPlayerToSafePoint();
         }
       } else if (!state.flags.starvingNotified) {
-        Game.pushMessage("急いで補給しよう。");
+        Game.pushMessage({ text: "急いで補給しよう。" });
         state.flags.starvingNotified = true;
       }
     }

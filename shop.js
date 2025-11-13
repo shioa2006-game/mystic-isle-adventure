@@ -12,14 +12,14 @@
    function tryOpenShop() {
      const state = Game.state;
      if (state.scene !== state.merchant.scene) {
-       Game.pushMessage("ここには商人がいない。");
+      Game.pushMessage({ text: "ここには商人がいない。" });
        return false;
      }
      if (!Game.utils.isAdjacent(state.playerPos, state.merchant.pos)) {
-       Game.pushMessage("もう一歩近づこう。");
+      Game.pushMessage({ text: "もう一歩近づこう。" });
        return false;
      }
-     Game.pushMessage("商人: いらっしゃいませ。何をお探しですか？");
+    Game.pushMessage({ text: "商人: いらっしゃいませ。何をお探しですか？" });
      Game.ui.open(Game.ui.OVERLAY.SHOP);
      return true;
    }
@@ -94,24 +94,24 @@
      const itemId = SHOP_ITEMS[shopState.selection];
      if (!itemId) return;
      const result = Game.buyItem(itemId);
-     Game.pushMessage(result.message);
+    Game.pushMessage({ text: result.message });
    }
 
    function handleSell() {
      const shopState = Game.ui.state.shop;
      const sellList = getSellOptions();
      if (!sellList.length) {
-       Game.pushMessage("売れるアイテムがない。");
+      Game.pushMessage({ text: "売れるアイテムがない。" });
        return;
      }
      const index = Game.utils.clamp(shopState.selection, 0, sellList.length - 1);
      const target = sellList[index];
      if (!target.canSell) {
-       Game.pushMessage(target.reason || "今は売却できない。");
+      Game.pushMessage({ text: target.reason || "今は売却できない。" });
        return;
      }
      const result = Game.sellItem(target.index);
-     Game.pushMessage(result.message);
+    Game.pushMessage({ text: result.message });
      const nextSellList = getSellOptions();
      if (nextSellList.length === 0) {
        shopState.selection = 0;

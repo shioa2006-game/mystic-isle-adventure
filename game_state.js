@@ -53,64 +53,10 @@
      throw new Error("ゲーム定数の一部が未定義です。constants.js の初期化を確認してください。");
    }
 
-   const ENEMY_DATA = Object.freeze({
-    SLIME: {
-      name: "スライム",
-      hp: [8, 12],
-      atk: [2, 3],
-      def: [0, 0],
-      exp: [3, 5],
-      gold: [4, 8],
-    },
-    BAT: {
-      name: "コウモリ",
-      hp: [14, 18],
-      atk: [3, 4],
-      def: [0, 1],
-      exp: [6, 8],
-      gold: [8, 12],
-    },
-    SPIDER: {
-      name: "クモ",
-      hp: [20, 26],
-      atk: [4, 6],
-      def: [1, 2],
-      exp: [9, 12],
-      gold: [12, 16],
-    },
-    GHOST: {
-      name: "ゴースト",
-      hp: [28, 34],
-      atk: [6, 7],
-      def: [2, 3],
-      exp: [12, 16],
-      gold: [16, 20],
-    },
-    VAMPIRE: {
-      name: "ヴァンパイア",
-      hp: [36, 44],
-      atk: [7, 9],
-      def: [3, 4],
-      exp: [18, 24],
-      gold: [22, 28],
-    },
-    TROLL: {
-      name: "トロル",
-      hp: [48, 58],
-      atk: [9, 11],
-      def: [4, 5],
-      exp: [24, 32],
-      gold: [28, 36],
-    },
-    DRAGON: {
-      name: "ドラゴン",
-      hp: [60, 80],
-      atk: [9, 11],
-      def: [4, 5],
-      exp: [30, 40],
-      gold: [35, 50],
-     },
-   });
+  if (!Game.ENEMY_DATA) {
+    throw new Error("敵データが未定義です。data/enemies.js の読み込みを確認してください。");
+  }
+  const ENEMY_DATA = Game.ENEMY_DATA;
 
   const progressFlags = PlayerState.createProgressFlags();
 
@@ -152,21 +98,35 @@
    };
 
 
-  function pushMessage(message, meta = {}) {
-    if (Game.messageLog && typeof Game.messageLog.push === "function") {
-      Game.messageLog.push(message, meta);
-      return;
-    }
-    const fallback = {
-      text: message != null ? String(message) : "",
-      icon: null,
-      tone: meta.tone || null,
-    };
-    state.messages.push(fallback);
-    if (state.messages.length > MAX_MESSAGES) {
-      state.messages.shift();
+  function normalizeMessageEntry(message, meta = {}) {
+    if (message && typeof message === "object") {
+      return {
+        text: message.text || "",
+        icon: message.icon || meta.icon || null,
+        tone: message.tone || meta.tone || null,
+      };
+    }
+    return {
+      text: message != null ? String(message) : "",
+      icon: meta.icon || null,
+      tone: meta.tone || null,
+    };
+  }
+
+  function pushMessage(message, meta = {}) {
+    const entry = normalizeMessageEntry(message, meta);
+    if (Game.messageLog && typeof Game.messageLog.push === "function") {
+      Game.messageLog.push(entry);
+      return;
+    }
+    const stateRef = Game.state || state;
+    if (!stateRef || !Array.isArray(stateRef.messages)) return;
+    stateRef.messages.push(entry);
+    while (stateRef.messages.length > MAX_MESSAGES) {
+      stateRef.messages.shift();
     }
   }
+
   function setPlayerPosition(pos) {
      state.playerPos = { x: pos.x, y: pos.y };
      markOccupancyDirty();
@@ -197,7 +157,7 @@
     setPlayerPosition(spawn);
     state.scene = nextScene;
     state.walkCounter = 0;
-    pushMessage(`${sceneLabels[nextScene]}へ移動した。`);
+    pushMessage({ text: `${sceneLabels[nextScene]}へ移動した。` });
     ensureSceneEnemies(nextScene);
     markOccupancyDirty();
     ensureOccupancy();
@@ -205,10 +165,16 @@
   }
 
    function initializeGame() {
-     resetForNewGame();
+     resetGameState();
+     Game.ui.open(Game.ui.OVERLAY.TITLE);
    }
 
-  function resetForNewGame() {
+   function startGame() {
+     resetGameState();
+    Game.pushMessage({ text: "島へようこそ。探索を始めよう。" });
+   }
+
+  function resetGameState() {
     PlayerState.resetProgressFlags(progressFlags);
     state.scene = SCENE.FIELD;
     state.walkCounter = 0;
@@ -229,7 +195,6 @@
      } else {
        setPlayerPosition({ x: 0, y: 0 });
      }
-     pushMessage("島へようこそ。探索を始めよう。");
      markOccupancyDirty();
      if (Game.entities && typeof Game.entities.spawnInitialEnemies === "function") {
        Game.entities.spawnInitialEnemies();
@@ -238,6 +203,11 @@
      }
      ensureOccupancy();
    }
+
+  function resetForNewGame() {
+    resetGameState();
+    Game.ui.open(Game.ui.OVERLAY.TITLE);
+  }
 
    function resetBattleState() {
      battleState.active = false;
@@ -265,7 +235,7 @@
       !progressFlags.questGiven
     ) {
       progressFlags.questGiven = true;
-      pushMessage("王様の頼みを胸に街をあとにした。");
+      pushMessage({ text: "王様の頼みを胸に街をあとにした。" });
     }
   }
 
@@ -292,27 +262,27 @@
 
    function handleChestEvent(scene, x, y) {
      if (PlayerState.hasOpenedChest(progressFlags, scene, x, y)) {
-       pushMessage("���łɊJ�����󔠂��B");
+        pushMessage({ text: "���łɊJ�����󔠂��B" });
        return;
      }
      PlayerState.markChestOpened(progressFlags, scene, x, y);
      progressFlags.hasKey = true;
-     pushMessage("�󔠂��J�����BAncient Key ����ɓ��ꂽ�B");
+    pushMessage({ text: "�󔠂��J�����BAncient Key ����ɓ��ꂽ�B" });
      markOccupancyDirty();
      ensureOccupancy();
    }
 
    function handleRuinsEvent(scene, x, y) {
      if (progressFlags.cleared) {
-       pushMessage("扉はすでに開いている。");
+      pushMessage({ text: "扉はすでに開いている。" });
        return;
      }
      if (!progressFlags.hasKey) {
-       pushMessage("重い扉だ…鍵が必要だ。");
+      pushMessage({ text: "重い扉だ…鍵が必要だ。" });
        return;
      }
      progressFlags.cleared = true;
-     pushMessage("扉が開いた！");
+    pushMessage({ text: "扉が開いた！" });
     if (Game.ui && typeof Game.ui.close === "function") {
       Game.ui.close();
     }
@@ -376,7 +346,7 @@
      }
      state.scene = SCENE.FIELD;
      state.player.hp = state.player.maxHp;
-     pushMessage("安全な場所で目を覚ました。");
+    pushMessage({ text: "安全な場所で目を覚ました。" });
      ensureSceneEnemies(state.scene);
      markOccupancyDirty();
      ensureOccupancy();
@@ -394,6 +364,7 @@
    Game.getCurrentMap = getCurrentMap;
    Game.switchScene = switchScene;
    Game.initializeGame = initializeGame;
+   Game.startGame = startGame;
    Game.addItem = addItem;
    Game.removeItemByIndex = removeItemByIndex;
    Game.describeItem = describeItem;
@@ -411,10 +382,8 @@
   Game.hasOpened = (scene, x, y) => PlayerState.hasOpenedChest(progressFlags, scene, x, y);
   Game.markOpened = (scene, x, y) => PlayerState.markChestOpened(progressFlags, scene, x, y);
   Game.nextEnemyInstanceId = nextEnemyInstanceId;
-  Game.ENEMY_DATA = ENEMY_DATA;
   Game.battle = battleState;
   if (Game.occupancy) {
     Game.occupancy.resolveTileEvent = resolveTileEvent;
   }
 })();
-

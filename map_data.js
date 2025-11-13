@@ -3,7 +3,8 @@
    const Game = (window.Game = window.Game || {});
 
    const F = Game.TILE;
-   const scenes = Game.SCENE;
+  const scenes = Game.SCENE;
+  const mapSources = Game.mapSources || {};
 
    const palette = {
      ".": F.GRASS,
@@ -51,101 +52,30 @@
      return list;
    }
 
-   function collectReservedPositions(rows) {
-     const list = [];
-     rows.forEach((row, y) => {
-       row.split("").forEach((ch, x) => {
-         if (reservedChars.has(ch)) {
-           list.push({ x, y });
-         }
-       });
-     });
-     return list;
-   }
+  function collectReservedPositions(rows) {
+    const list = [];
+    rows.forEach((row, y) => {
+      row.split("").forEach((ch, x) => {
+        if (reservedChars.has(ch)) {
+          list.push({ x, y });
+        }
+      });
+    });
+    return list;
+  }
 
-   const FIELD_RAW = normalizeRows([
-     "~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~",
-     "~ . . . . . . . t t . . . # # . . . t t . . . ~",
-     "~ . . . . . s . . . . . . . . . . . . . . . . ~",
-     "~ . . ~ ~ ~ ~ ~ . . . . . t t . . . . . h . . ~",
-     "~ . . ~ s s s ~ . # # . . . . . . . . . . . . ~",
-     "~ . . ~ s u s ~ . # # . . t t . . s . . . . . ~",
-     "~ . . ~ s . s ~ . . . . . . . . . . . . . . . ~",
-     "~ . . ~ . . . ~ . . . t t . . . . . . . . . . ~",
-     "~ . . ~ . . . ~ . . . . . . . . . . v . . . . ~",
-     "~ . . ~ . . . ~ . . # # . . . . . . . . . . . ~",
-     "~ . . ~ . . . ~ . . # # . . . . . . . . . . . ~",
-     "~ . . ~ . . . ~ . . . . . . . . . . . . . . . ~",
-     "~ . . . . . . . . . . . . . . . . . . . . . . ~",
-     "~ . . t t . . . . . . . . . # # # # . . . . . ~",
-     "~ . . . . . . . . . . . . . . . . . . . . . . ~",
-     "~ . . s . . . . . . . . . . . . . . . . . . . ~",
-     "~ . . . . . . . . . . . . . . . . . . . . . . ~",
-     "~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~",
-   ]);
+  function ensureRawRows(key, fileLabel) {
+    const rows = mapSources[key];
+    if (!rows || !Array.isArray(rows) || rows.length === 0) {
+      throw new Error(`${fileLabel} のマップデータが未定義です。data/maps/${fileLabel}.js を読み込んでください。`);
+    }
+    return normalizeRows(rows);
+  }
 
-   const TOWN_RAW = normalizeRows([
-     "w w w w w w w w w w w d w w w w w w w w w w w w",
-     "w . . . . . . . . . . r t w f f f s s s f f f w",
-     "w . . . . . . . . . . r t w f f f s f s f f f w",
-     "w . . t . . . w w w w r t w f f f f f f f f f w",
-     "w . . . . . . w f f f r t w f f f f f f f f f w",
-     "w . . . . . . w f f f r t w f f f f f f f f f w",
-     "w . t t . . . w f f f r t w w w w f f f w w w w",
-     "w . . . . . . w w w w r t t t t t r r r t t t w",
-     "w r r r r r r r r r r r r r r r r r r r r r r w",
-     "w . . . . . . . . . . r w w w w . . . . . . . w",
-     "w . t t . . . . . . . r f f f w . . . . t t . w",
-     "w . . . . . . . . . . r f f f w . . . . . . . w",
-     "w . . . . . . . t t . r f f f w . t t . . . . w",
-     "w . . . . . . . . . . r w w w w . . . . . . . w",
-     "w . . . . . . . . t t r . . . . . . . . t t . w",
-     "w . . . . . . . . . . r . . . . . . . . . . . w",
-     "w . . . . . . . . . . r . . . . . . . . . . . w",
-     "w w w w w w w w w w w d w w w w w w w w w w w w",
-   ]);
-
-  const CAVE_B1_RAW = normalizeRows([
-    "s s s s s s s s s s s s s s s s s s s s s s s s",
-    "s c c c c c c c c c x c c c c c c c c c c c c s",
-    "s c s s c c c c c c c c c c c c c c c c c c c s",
-    "s c c c c c s c c c c c c c c c c c s s s c c s",
-    "s c c c c c s c c c c c c c c c c c c c c c c s",
-    "s c c c c c s c c s s c c c c c c c c c c c c s",
-    "s c c c c c c c c c c c c c c c c c c c c c c s",
-    "s c c s s c c c c c c c c c c c c c c c c c c s",
-    "s c c c c c c c c c c c c c c c c c c c c c c s",
-    "s c c c s c c c c c s s c c c c c c c c c c c s",
-    "s c c c c c c c c c c c c c c c s s c c c c c s",
-    "s c c c c c c c s c c c c c c c c c c c c c c s",
-    "s c c c c c c c c c c c c c c c c c c c c c c s",
-    "s c c c c c c c c c c c c c c c c c c c c c c s",
-    "s c c c s s c c c c c c c s s c c c c c c c c s",
-    "s c c c c c c c c c c c c c c c c c c c c c c s",
-    "s c c c c c c c c c c c c c c c c c c c c c y s",
-    "s s s s s s s s s s s s s s s s s s s s s s s s",
-  ]);
-
-  const CAVE_B2_RAW = normalizeRows([
-    "s s s s s s s s s s s s s s s s s s s s s s s s",
-    "s c c c c c c c c c c c c c c c c c c c c c c s",
-    "s c c c c c c c c c c c c s s c c c c c c c c s",
-    "s c c c s s c c c c c c c c c c c c c c s s c s",
-    "s c c c c c c c c c c c c c c c c c c c c c c s",
-    "s c c c c c c c c c s s c c c c c c c c c c c s",
-    "s c c c c c s c c c c c c c c c c c c c c c c s",
-    "s c c s c c s c c c c c c c c c c c c c c c c s",
-    "s c c s c c c c c c c c c c c s c c c c c c c s",
-    "s c c c c c c c c s c c c c c s c c c c c c c s",
-    "s c c c c c c c c c c c c c c c c s c c c c c s",
-    "s c c c c s s c c c c c c c c c c c c c c c c s",
-    "s c c c c c c c c c c c c c c c c c c c c c c s",
-    "s c c c c c c c c c c s c c c c c s c c c c c s",
-    "s c c c c c s c c c c c c c c c c c c c c c c s",
-    "s c c c c c c s s c c c c c c c c c c c c c c s",
-    "s c c c c c c c c c c c c c c c c c c c c c x s",
-    "s s s s s s s s s s s s s s s s s s s s s s s s",
-  ]);
+  const FIELD_RAW = ensureRawRows("FIELD", "field");
+  const TOWN_RAW = ensureRawRows("TOWN", "town");
+  const CAVE_B1_RAW = ensureRawRows("CAVE", "cave_b1");
+  const CAVE_B2_RAW = ensureRawRows("CAVE_B2", "cave_b2");
 
   const fieldTiles = createTiles(FIELD_RAW);
   const townTiles = createTiles(TOWN_RAW);

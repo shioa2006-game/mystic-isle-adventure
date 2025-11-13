@@ -26,19 +26,16 @@ function setup() {
   background(0);
 }
 
-function draw() {
-  background(0);
-  Game.occupancy.ensure();
-  Game.renderer.drawMap();
-  Game.renderer.drawEntities();
-  Game.renderer.drawUI();
-  Game.renderer.drawOverlays();
-  Game.renderer.drawBattleOverlay();
-  Game.renderer.drawClearOverlay();
-
-  // 連続移動を処理
-  Game.input.update();
+function draw() {
+  background(0);
+  Game.occupancy.ensure();
+  Game.renderer.drawAll();
+
+  // 入力状態の更新
+  Game.input.update();
 }
+
+
 
 function keyPressed() {
   if (Game.flags && Game.flags.cleared) {

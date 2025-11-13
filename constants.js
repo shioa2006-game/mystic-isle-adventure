@@ -71,21 +71,6 @@
     ANCIENT_KEY: "ANCIENT_KEY",
   });
 
-  const PRICE = Object.freeze({
-    [ITEM.FOOD10]: 10,
-    [ITEM.POTION]: 15,
-    [ITEM.BRONZE_SWORD]: 40,
-    [ITEM.WOOD_SHIELD]: 35,
-  });
-
-  const ITEM_META = Object.freeze({
-    [ITEM.FOOD10]: { name: "Food 10", detail: "Food を 10 回復" },
-    [ITEM.POTION]: { name: "Potion", detail: "HP を 20 回復" },
-    [ITEM.BRONZE_SWORD]: { name: "Bronze Sword", detail: "ATK +2" },
-    [ITEM.WOOD_SHIELD]: { name: "Wood Shield", detail: "DEF +2" },
-    [ITEM.ANCIENT_KEY]: { name: "Ancient Key", detail: "遺跡の鍵" },
-  });
-
   const INVENTORY_MAX = 6;
   const FOOD_CAP = 999;
 
@@ -95,6 +80,7 @@
   });
 
   const OVERLAY = Object.freeze({
+    TITLE: "TITLE",
     SHOP: "SHOP",
     INVENTORY: "INVENTORY",
     STATUS: "STATUS",
@@ -130,8 +116,6 @@
   Game.TILE_BLOCKED = TILE_BLOCKED;
   Game.sceneLabels = sceneLabels;
   Game.ITEM = ITEM;
-  Game.PRICE = PRICE;
-  Game.ITEM_META = ITEM_META;
   Game.INVENTORY_MAX = INVENTORY_MAX;
   Game.FOOD_CAP = FOOD_CAP;
   Game.EQUIP_BONUS = EQUIP_BONUS;

@@ -58,7 +58,7 @@
      const variance = Game.utils.randInt(0, 2);
      const dmg = Math.max(1, playerStats.atk + variance - enemy.def);
      enemy.hp = Math.max(0, enemy.hp - dmg);
-     Game.pushMessage(`攻撃！ ${dmg} ダメージを与えた。`);
+    Game.pushMessage({ text: `攻撃！ ${dmg} ダメージを与えた。` });
      if (enemy.hp <= 0) {
        handleVictory();
        return;
@@ -69,7 +69,7 @@
 
    function handlePlayerDefend() {
      Game.battle.playerDefending = true;
-     Game.pushMessage("身を固めた…");
+    Game.pushMessage({ text: "身を固めた…" });
      Game.battle.turn = "ENEMY";
      enemyTurn();
    }
@@ -77,10 +77,10 @@
    function handlePlayerRun() {
      const success = Math.random() < 0.5;
      if (success) {
-       Game.pushMessage("うまく逃げ切った！");
+      Game.pushMessage({ text: "うまく逃げ切った！" });
        endBattle();
      } else {
-       Game.pushMessage("逃げられなかった。");
+      Game.pushMessage({ text: "逃げられなかった。" });
        Game.battle.turn = "ENEMY";
        enemyTurn();
      }
@@ -115,13 +115,13 @@
      const enemy = Game.battle.enemy;
      Game.state.player.gold += enemy.gold;
      Game.grantExp(enemy.exp);
-     Game.pushMessage(`勝利！ EXP +${enemy.exp} / Gold +${enemy.gold}`);
+    Game.pushMessage({ text: `勝利！ EXP +${enemy.exp} / Gold +${enemy.gold}` });
      Game.entities.removeEnemyById(enemy.instanceId);
      endBattle();
    }
 
    function handleDefeat() {
-     Game.pushMessage("倒れてしまった…");
+    Game.pushMessage({ text: "倒れてしまった…" });
      Game.resetPlayerToSafePoint();
      endBattle();
    }

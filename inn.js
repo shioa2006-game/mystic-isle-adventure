@@ -14,7 +14,7 @@
       label: "N: やめる",
       action() {
         closeInn();
-        Game.pushMessage("またどうぞ。");
+        Game.pushMessage({ text: "またどうぞ。" });
       },
     },
     {
@@ -33,14 +33,14 @@
   function tryOpenInn() {
     const state = Game.state;
     if (state.scene !== state.innkeeper.scene) {
-      Game.pushMessage("ここには宿屋がない。");
+      Game.pushMessage({ text: "ここには宿屋がない。" });
       return false;
     }
     if (!Game.utils.isAdjacent(state.playerPos, state.innkeeper.pos)) {
-      Game.pushMessage("もう一歩近づこう。");
+      Game.pushMessage({ text: "もう一歩近づこう。" });
       return false;
     }
-    Game.pushMessage("宿屋主人: いらっしゃいませ。一晩 10G で泊まっていきますか？");
+    Game.pushMessage({ text: "宿屋主人: いらっしゃいませ。一晩 10G で泊まっていきますか？" });
     resetSelection();
     Game.ui.open(Game.ui.OVERLAY.INN);
     return true;
@@ -107,17 +107,17 @@
   function stayAtInn() {
     const player = Game.state.player;
     if (player.hp >= player.maxHp) {
-      Game.pushMessage("HP は既に最大だ。");
+      Game.pushMessage({ text: "HP は既に最大だ。" });
       return;
     }
     if (player.gold < INN_COST) {
-      Game.pushMessage("Gold が足りない。");
+      Game.pushMessage({ text: "Gold が足りない。" });
       return;
     }
     player.gold -= INN_COST;
     player.hp = player.maxHp;
-    Game.pushMessage(`${INN_COST}G を支払った。`);
-    Game.pushMessage("ぐっすり眠り、HP が完全に回復した。");
+    Game.pushMessage({ text: `${INN_COST}G を支払った。` });
+    Game.pushMessage({ text: "ぐっすり眠り、HP が完全に回復した。" });
     closeInn();
   }
 
