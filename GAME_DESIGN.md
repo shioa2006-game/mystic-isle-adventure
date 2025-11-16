@@ -20,7 +20,7 @@
 
 **現在の実装範囲**:
 - シーン: FIELD, TOWN, CAVE（洞窟1のみ、現在は2層構造）
-- 敵: 13種類（SLIME, BAT, SPIDER, WOLF, GHOST, LIZARDMAN, VAMPIRE, TROLL, DARK_KNIGHT, STONE_GUARDIAN, CURSED_ARMOR, SHADOW_BEAST, DRAGON）
+- 敵: 13種類（SLIME, BAT, SPIDER, GHOST, WOLF, SKELETON, LIZARDMAN, VAMPIRE, TROLL, GOLEM, DARK_KNIGHT, REAPER, DRAGON）
 - 装備: 剣1種（Bronze Sword）、盾1種（Wood Shield）
 - NPC: 王様、商人、宿屋主人
 - クリア条件: 遺跡到達（※新ストーリーでは聖剣・聖盾装備が必要）
@@ -157,25 +157,25 @@
 
 | 敵 | 出現場所 | HP | ATK | DEF | EXP | Gold |
 |---|---|---|---|---|---|---|
-| WOLF（ウルフ） | CAVE1 | 24–32 | 5–7 | 1–2 | 10–14 | 14–18 |
 | GHOST（ゴースト） | CAVE1 | 28–34 | 6–7 | 2–3 | 12–16 | 16–20 |
-| LIZARDMAN（リザードマン） | CAVE1 | 32–40 | 6–8 | 2–3 | 14–18 | 18–22 |
+| WOLF（ウルフ） | CAVE1 | 24–32 | 5–7 | 1–2 | 10–14 | 14–18 |
+| SKELETON（スケルトン） | CAVE1 | 32–40 | 6–8 | 2–3 | 14–18 | 18–22 |
 
 ### 洞窟2（3種）
 
 | 敵 | 出現場所 | HP | ATK | DEF | EXP | Gold |
 |---|---|---|---|---|---|---|
+| LIZARDMAN（リザードマン） | CAVE2 | 40–48 | 8–10 | 3–4 | 20–26 | 24–30 |
 | VAMPIRE（ヴァンパイア） | CAVE2 | 36–44 | 7–9 | 3–4 | 18–24 | 22–28 |
 | TROLL（トロール） | CAVE2 | 48–58 | 9–11 | 4–5 | 24–32 | 28–36 |
-| DARK_KNIGHT（ダークナイト） | CAVE2 | 60–70 | 10–12 | 5–6 | 30–40 | 30–40 |
 
 ### 遺跡（3種）
 
 | 敵 | 出現場所 | HP | ATK | DEF | EXP | Gold |
 |---|---|---|---|---|---|---|
-| STONE_GUARDIAN（ストーンガーディアン） | RUINS | 70–80 | 12–14 | 6–8 | 40–50 | 42–55 |
-| CURSED_ARMOR（カースドアーマー） | RUINS | 75–85 | 13–15 | 7–9 | 45–55 | 48–60 |
-| SHADOW_BEAST（シャドウビースト） | RUINS | 80–90 | 14–16 | 8–10 | 50–60 | 52–65 |
+| GOLEM（ゴーレム） | RUINS | 70–80 | 12–14 | 6–8 | 40–50 | 42–55 |
+| DARK_KNIGHT（ダークナイト） | RUINS | 75–85 | 13–15 | 7–9 | 45–55 | 48–60 |
+| REAPER（リーパー） | RUINS | 80–90 | 14–16 | 8–10 | 50–60 | 52–65 |
 
 ### ラスボス
 
@@ -413,18 +413,22 @@ FIELD（フィールド）
 ### 9.4. 新モンスター追加 ⭐
 
 **実装内容**:
+- フィールド専用モンスター3種：
+  - SLIME（スライム）
+  - BAT（コウモリ）
+  - SPIDER（クモ）
 - 洞窟1専用モンスター3種：
-  - WOLF（ウルフ）
   - GHOST（ゴースト）
-  - LIZARDMAN（リザードマン）
+  - WOLF（ウルフ）
+  - SKELETON（スケルトン）
 - 洞窟2専用モンスター3種：
+  - LIZARDMAN（リザードマン）
   - VAMPIRE（ヴァンパイア）
   - TROLL（トロール）
-  - DARK_KNIGHT（ダークナイト）
 - 遺跡専用モンスター3種：
-  - STONE_GUARDIAN（ストーンガーディアン）
-  - CURSED_ARMOR（カースドアーマー）
-  - SHADOW_BEAST（シャドウビースト）
+  - GOLEM（ゴーレム）
+  - DARK_KNIGHT（ダークナイト）
+  - REAPER（リーパー）
 - ボス：DRAGON（ドラゴン）
 
 **実装ファイル**:
@@ -548,7 +552,7 @@ FIELD（フィールド）
 ### 9.12. 古代竜ボス戦 ⭐
 
 **実装内容**:
-- 遺跡地下2階に古代竜（ANCIENT_DRAGON）を固定配置
+- 遺跡地下2階に古代竜（DRAGON）を固定配置
 - 遺跡は常に進入可能（Ancient Key不要）
 - 聖剣・聖盾がないとダメージを与えられない/防げない仕様
 - 討伐後、ゲームクリア判定
