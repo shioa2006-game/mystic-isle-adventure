@@ -23,15 +23,31 @@
       case Game.ui.OVERLAY.INN:
         Game.inn.handleInput(keyValue, keyCode);
         break;
+      case Game.ui.OVERLAY.SAVE_CONFIRM:
+        handleSaveConfirmOverlayInput(keyValue, keyCode);
+        break;
       default:
         break;
     }
   }
 
   function handleTitleOverlayInput(keyValue, keyCode) {
+    const titleState = Game.ui.state.title;
+    if (keyCode === window.UP_ARROW) {
+      titleState.selection = 0;
+      return;
+    }
+    if (keyCode === window.DOWN_ARROW) {
+      titleState.selection = 1;
+      return;
+    }
     if (keyCode === window.ENTER) {
       Game.ui.close();
-      Game.startGame();
+      if (titleState.selection === 1 && Game.saveSystem && typeof Game.saveSystem.continueFromLatest === "function") {
+        Game.saveSystem.continueFromLatest();
+      } else {
+        Game.startGame();
+      }
     }
   }
 
@@ -80,6 +96,40 @@
     const upper = (keyValue || "").toUpperCase();
     if (keyCode === window.ESCAPE || upper === "ESCAPE" || upper === "S") {
       Game.ui.close();
+    }
+  }
+
+  function handleSaveConfirmOverlayInput(keyValue, keyCode) {
+    const confirmState = Game.ui.state.saveConfirm;
+    const upper = (keyValue || "").toUpperCase();
+    if (keyCode === window.UP_ARROW || keyCode === window.LEFT_ARROW) {
+      confirmState.selection = 0;
+      return;
+    }
+    if (keyCode === window.DOWN_ARROW || keyCode === window.RIGHT_ARROW) {
+      confirmState.selection = 1;
+      return;
+    }
+    if (upper === "Y") {
+      confirmState.selection = 0;
+      Game.saveSystem.executeSave();
+      return;
+    }
+    if (upper === "N") {
+      confirmState.selection = 1;
+      Game.saveSystem.cancelSave();
+      return;
+    }
+    if (keyCode === window.ESCAPE || upper === "ESCAPE") {
+      Game.saveSystem.cancelSave();
+      return;
+    }
+    if (keyCode === window.ENTER) {
+      if (confirmState.selection === 0) {
+        Game.saveSystem.executeSave();
+      } else {
+        Game.saveSystem.cancelSave();
+      }
     }
   }
 

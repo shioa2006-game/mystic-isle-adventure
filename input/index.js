@@ -88,6 +88,16 @@
       Game.dialogue.talk("king");
       return;
     }
+    if (
+      Game.state.priest &&
+      Game.utils.isAdjacent(pos, Game.state.priest.pos) &&
+      Game.state.scene === Game.state.priest.scene &&
+      Game.dialogue &&
+      typeof Game.dialogue.talk === "function"
+    ) {
+      Game.dialogue.talk("priest");
+      return;
+    }
     if (Game.dialogue && typeof Game.dialogue.talk === "function") {
       Game.dialogue.talk("default");
       return;

@@ -15,6 +15,12 @@
     inventory: {
       selection: 0,
     },
+    title: {
+      selection: 0,
+    },
+    saveConfirm: {
+      selection: 0,
+    },
   };
 
   function resetShopState() {
@@ -26,10 +32,20 @@
     uiState.inventory.selection = 0;
   }
 
+  function resetTitleState() {
+    uiState.title.selection = 0;
+  }
+
+  function resetSaveConfirmState() {
+    uiState.saveConfirm.selection = 0;
+  }
+
   function resetAll() {
     uiState.overlay = null;
     resetShopState();
     resetInventoryState();
+    resetTitleState();
+    resetSaveConfirmState();
   }
 
   function openOverlay(type) {
@@ -39,6 +55,12 @@
     }
     if (type === Game.OVERLAY.INVENTORY) {
       resetInventoryState();
+    }
+    if (type === Game.OVERLAY.TITLE) {
+      resetTitleState();
+    }
+    if (type === Game.OVERLAY.SAVE_CONFIRM) {
+      resetSaveConfirmState();
     }
   }
 
@@ -58,6 +80,8 @@
     isOpen: isOverlayOpen,
     resetShop: resetShopState,
     resetInventory: resetInventoryState,
+    resetTitle: resetTitleState,
+    resetSaveConfirm: resetSaveConfirmState,
     resetAll,
   };
 })();

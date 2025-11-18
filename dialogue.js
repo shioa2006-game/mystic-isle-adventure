@@ -196,6 +196,9 @@
     ) {
       Game.flags.questTalked = true;
     }
+    if (session.characterId === "priest" && Game.saveSystem && typeof Game.saveSystem.requestSave === "function") {
+      Game.saveSystem.requestSave();
+    }
     // 空行はstartSession()で追加済みなので、ここでは追加しない
     // クールダウンを有効化（次の移動まで会話を開始できない）
     dialogueState.cooldownUntilMove = true;

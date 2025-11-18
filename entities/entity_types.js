@@ -7,6 +7,8 @@
     MERCHANT: "MERCHANT",
     INNKEEPER: "INNKEEPER",
     KING: "KING",
+    PRIEST: "PRIEST",
+    BLACKSMITH: "BLACKSMITH",
   });
 
   const ENEMY_KIND = Object.freeze({
@@ -31,6 +33,8 @@
         [ACTOR_KIND.MERCHANT]: 1,
         [ACTOR_KIND.INNKEEPER]: 2,
         [ACTOR_KIND.KING]: 3,
+        [ACTOR_KIND.PRIEST]: 4,
+        [ACTOR_KIND.BLACKSMITH]: 5,
       }),
     },
     enemy: {

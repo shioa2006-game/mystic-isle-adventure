@@ -85,6 +85,7 @@
     INVENTORY: "INVENTORY",
     STATUS: "STATUS",
     INN: "INN",
+    SAVE_CONFIRM: "SAVE_CONFIRM",
   });
 
   const LAYER = Object.freeze({

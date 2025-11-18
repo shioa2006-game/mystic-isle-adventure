@@ -47,6 +47,9 @@
     if (Game.state.king) {
       actors.push({ kind: Game.entities.ACTOR_KIND.KING, data: Game.state.king });
     }
+    if (Game.state.priest) {
+      actors.push({ kind: Game.entities.ACTOR_KIND.PRIEST, data: Game.state.priest });
+    }
     actors.forEach((entry) => {
       if (!entry.data || entry.data.scene !== Game.state.scene) return;
       const ok = Game.entities.drawActor(

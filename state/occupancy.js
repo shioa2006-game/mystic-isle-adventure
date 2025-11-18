@@ -151,6 +151,12 @@
         npc: true,
       });
     }
+    if (state.priest && state.priest.scene === state.scene) {
+      occupyCell(state.priest.pos.x, state.priest.pos.y, {
+        layer: Game.LAYER.NPC,
+        npc: true,
+      });
+    }
 
     state.enemies
       .filter((enemy) => enemy.scene === state.scene)
@@ -268,6 +274,9 @@
       return false;
     }
     if (state.king && state.king.scene === targetScene && state.king.pos.x === x && state.king.pos.y === y) {
+      return false;
+    }
+    if (state.priest && state.priest.scene === targetScene && state.priest.pos.x === x && state.priest.pos.y === y) {
       return false;
     }
     if (targetScene === state.scene && state.playerPos.x === x && state.playerPos.y === y) {

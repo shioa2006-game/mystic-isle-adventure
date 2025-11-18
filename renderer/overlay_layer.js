@@ -23,6 +23,9 @@
       case Game.ui.OVERLAY.INN:
         drawInnOverlay(p);
         break;
+      case Game.ui.OVERLAY.SAVE_CONFIRM:
+        drawSaveConfirmOverlay(p);
+        break;
       default:
         break;
     }
@@ -210,11 +213,65 @@
     p.rect(0, 0, Game.config.canvasWidth, Game.config.canvasHeight);
     p.fill(255);
     p.textAlign(p.CENTER, p.CENTER);
-    p.textSize(48);
+    p.textSize(32);
     p.text("Mystic Isle Adventure", Game.config.canvasWidth / 2, Game.config.canvasHeight / 2 - 40);
-    p.textSize(20);
-    p.text("Press ENTER to start", Game.config.canvasWidth / 2, Game.config.canvasHeight / 2 + 40);
+    const options = [
+      { label: "はじめから", disabled: false },
+      {
+        label: "続きから",
+        disabled: !(Game.saveSystem && Game.saveSystem.hasSaveData && Game.saveSystem.hasSaveData()),
+      },
+    ];
+    p.textSize(18);
+    const baseY = Game.config.canvasHeight / 2 + 10;
+    options.forEach((option, index) => {
+      const isSelected = Game.ui.state.title.selection === index;
+      const rowY = baseY + index * 34;
+      if (isSelected) {
+        p.fill(40, 120, 200, 180);
+        p.rect(Game.config.canvasWidth / 2 - 120, rowY - 18, 240, 30, 10);
+        p.fill(255);
+      } else {
+        p.fill(option.disabled ? p.color(160, 160, 160) : 220);
+      }
+      const label = option.disabled ? `${option.label}（記録なし）` : option.label;
+      p.text(label, Game.config.canvasWidth / 2, rowY);
+    });
+    p.textSize(16);
+    p.fill(220);
+    p.text(
+      "Enter: 決定 / ↑↓: 選択",
+      Game.config.canvasWidth / 2,
+      Game.config.canvasHeight / 2 + options.length * 34 + 30
+    );
     p.pop();
+  }
+
+  function drawSaveConfirmOverlay(p = window) {
+    drawOverlayFrame(p);
+    p.fill(255);
+    p.textAlign(p.LEFT, p.TOP);
+    p.textSize(18);
+    p.text("CHURCH", overlayArea.x + 16, overlayArea.y + 16);
+    p.textSize(16);
+    p.text("祈りを捧げて冒険を記録しますか？", overlayArea.x + 16, overlayArea.y + 52);
+    const options = ["Y / Enter: 記録する", "N: やめる"];
+    const selection = Game.ui.state.saveConfirm.selection;
+    let listY = overlayArea.y + 84;
+    options.forEach((label, index) => {
+      const rowY = listY + index * 34;
+      if (selection === index) {
+        p.fill(40, 120, 200, 180);
+        p.rect(overlayArea.x + 12, rowY - 6, overlayArea.width - 24, 28, 6);
+        p.fill(255);
+      } else {
+        p.fill(220);
+      }
+      p.text(label, overlayArea.x + 20, rowY);
+    });
+    p.textSize(14);
+    p.fill(200);
+    p.text("ESC: 閉じる", overlayArea.x + 16, overlayArea.y + overlayArea.height - 32);
   }
 
   function drawClearOverlay(p = window) {

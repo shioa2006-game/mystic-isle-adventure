@@ -90,6 +90,10 @@
        scene: SCENE.TOWN,
        pos: { x: 18, y: 2 },
      },
+     priest: {
+       scene: SCENE.TOWN,
+       pos: { x: 15, y: 2 },
+     },
      flags: {
        starvingNotified: false,
        dragonDefeated: false,
@@ -98,27 +102,48 @@
    };
 
 
-  function normalizeMessageEntry(message, meta = {}) {
-    if (message && typeof message === "object") {
-      return {
-        text: message.text || "",
-        icon: message.icon || meta.icon || null,
-        tone: message.tone || meta.tone || null,
-      };
-    }
-    return {
-      text: message != null ? String(message) : "",
-      icon: meta.icon || null,
-      tone: meta.tone || null,
-    };
-  }
-
-  function pushMessage(message, meta = {}) {
-    const entry = normalizeMessageEntry(message, meta);
-    if (Game.messageLog && typeof Game.messageLog.push === "function") {
-      Game.messageLog.push(entry);
-      return;
-    }
+  function normalizeMessageEntry(message, meta = {}) {
+
+    if (message && typeof message === "object") {
+
+      return {
+
+        text: message.text || "",
+
+        icon: message.icon || meta.icon || null,
+
+        tone: message.tone || meta.tone || null,
+
+      };
+
+    }
+
+    return {
+
+      text: message != null ? String(message) : "",
+
+      icon: meta.icon || null,
+
+      tone: meta.tone || null,
+
+    };
+
+  }
+
+
+
+  function pushMessage(message, meta = {}) {
+
+    const entry = normalizeMessageEntry(message, meta);
+
+    if (Game.messageLog && typeof Game.messageLog.push === "function") {
+
+      Game.messageLog.push(entry);
+
+      return;
+
+    }
+
     const stateRef = Game.state || state;
     if (!stateRef || !Array.isArray(stateRef.messages)) return;
     stateRef.messages.push(entry);
@@ -126,7 +151,8 @@
       stateRef.messages.shift();
     }
   }
-
+
+
   function setPlayerPosition(pos) {
      state.playerPos = { x: pos.x, y: pos.y };
      markOccupancyDirty();
@@ -164,10 +190,13 @@
     handleQuestProgressOnSceneChange(prevScene, nextScene);
   }
 
-   function initializeGame() {
-     resetGameState();
-     Game.ui.open(Game.ui.OVERLAY.TITLE);
-   }
+  function initializeGame() {
+    resetGameState();
+    Game.ui.open(Game.ui.OVERLAY.TITLE);
+    if (Game.saveSystem && typeof Game.saveSystem.refreshAvailability === "function") {
+      Game.saveSystem.refreshAvailability();
+    }
+  }
 
    function startGame() {
      resetGameState();
@@ -207,6 +236,9 @@
   function resetForNewGame() {
     resetGameState();
     Game.ui.open(Game.ui.OVERLAY.TITLE);
+    if (Game.saveSystem && typeof Game.saveSystem.refreshAvailability === "function") {
+      Game.saveSystem.refreshAvailability();
+    }
   }
 
    function resetBattleState() {
@@ -262,12 +294,12 @@
 
    function handleChestEvent(scene, x, y) {
      if (PlayerState.hasOpenedChest(progressFlags, scene, x, y)) {
-        pushMessage({ text: "���łɊJ�����󔠂��B" });
+       pushMessage({ text: "宝箱はすでに開いている。" });
        return;
      }
      PlayerState.markChestOpened(progressFlags, scene, x, y);
      progressFlags.hasKey = true;
-    pushMessage({ text: "�󔠂��J�����BAncient Key ����ɓ��ꂽ�B" });
+     pushMessage({ text: "宝箱を開けた！ Ancient Key を手に入れた。" });
      markOccupancyDirty();
      ensureOccupancy();
    }
@@ -338,19 +370,26 @@
    }
 
    function resetPlayerToSafePoint() {
-     const map = Game.mapData ? Game.mapData[SCENE.FIELD] : null;
-     if (map && map.spawnPoints && map.spawnPoints.default) {
-       setPlayerPosition(map.spawnPoints.default);
-     } else {
-       setPlayerPosition({ x: 2, y: 2 });
-     }
-     state.scene = SCENE.FIELD;
+     const priest = state.priest;
+     const gridHeight = Game.config ? Game.config.gridHeight : 18;
+     const safeScene = priest ? priest.scene : SCENE.TOWN;
+     const baseY = gridHeight > 0 ? gridHeight - 1 : 17;
+     const safePos = priest
+       ? { x: priest.pos.x, y: Math.min(priest.pos.y + 1, baseY) }
+       : { x: 12, y: 12 };
+     state.scene = safeScene;
+     setPlayerPosition(safePos);
      state.player.hp = state.player.maxHp;
-    pushMessage({ text: "安全な場所で目を覚ました。" });
+     state.player.gold = Math.max(0, Math.floor(state.player.gold / 2));
+     state.player.food = Math.max(0, Math.floor(state.player.food / 2));
+     state.walkCounter = 0;
+     state.flags.starvingNotified = false;
+    pushMessage({ text: "神父の祈りで蘇りました。しかし、Gold と Food が半分になってしまった…" });
      ensureSceneEnemies(state.scene);
      markOccupancyDirty();
      ensureOccupancy();
    }
+
 
    function nextEnemyInstanceId() {
      state.enemyIdSeq += 1;
