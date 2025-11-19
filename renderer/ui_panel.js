@@ -76,16 +76,27 @@
     p.text(`HP: ${player.hp}/${player.maxHp}`, x + 12, y + 12);
     p.fill(240);
     p.text(`LV: ${player.lv}  EXP: ${player.exp}`, x + 220, y + 12);
+    const weaponName = resolveEquippedName(player, "weapon");
+    const shieldName = resolveEquippedName(player, "shield");
     const lines = [
       `ATK/DEF: ${stats.atk} / ${stats.def}`,
       `Food: ${player.food}  Gold: ${player.gold}  Key: ${keyStatus}`,
-      `Weapon: ${player.equip.weapon !== null ? "Bronze Sword" : "-"}  Shield: ${
-        player.equip.shield !== null ? "Wood Shield" : "-"
-      }`,
+      `Weapon: ${weaponName}  Shield: ${shieldName}`,
     ];
     lines.forEach((line, index) => {
       p.text(line, x + 12, y + 12 + (index + 1) * 24);
     });
+  }
+
+  function resolveEquippedName(player, slotKey) {
+    const equipIndex = player && player.equip ? player.equip[slotKey] : null;
+    if (equipIndex == null || equipIndex < 0 || equipIndex >= player.inventory.length) {
+      return "-";
+    }
+    const itemId = player.inventory[equipIndex];
+    if (!itemId) return "-";
+    const meta = Game.ITEM_META ? Game.ITEM_META[itemId] : null;
+    return (meta && meta.name) || itemId || "-";
   }
 
   Game.rendererLayers = Game.rendererLayers || {};

@@ -66,18 +66,21 @@
   const ITEM = Object.freeze({
     FOOD10: "FOOD10",
     POTION: "POTION",
+    WOOD_SWORD: "WOOD_SWORD",
     BRONZE_SWORD: "BRONZE_SWORD",
+    IRON_SWORD: "IRON_SWORD",
+    HOLY_SWORD: "HOLY_SWORD",
     WOOD_SHIELD: "WOOD_SHIELD",
+    BRONZE_SHIELD: "BRONZE_SHIELD",
+    IRON_SHIELD: "IRON_SHIELD",
+    HOLY_SHIELD: "HOLY_SHIELD",
+    POWER_HAMMER: "POWER_HAMMER",
+    HOLY_ORE: "HOLY_ORE",
     ANCIENT_KEY: "ANCIENT_KEY",
   });
 
   const INVENTORY_MAX = 6;
   const FOOD_CAP = 999;
-
-  const EQUIP_BONUS = Object.freeze({
-    weapon: 2,
-    shield: 2,
-  });
 
   const OVERLAY = Object.freeze({
     TITLE: "TITLE",
@@ -119,7 +122,6 @@
   Game.ITEM = ITEM;
   Game.INVENTORY_MAX = INVENTORY_MAX;
   Game.FOOD_CAP = FOOD_CAP;
-  Game.EQUIP_BONUS = EQUIP_BONUS;
   Game.OVERLAY = OVERLAY;
   Game.LAYER = LAYER;
   Game.RESERVED_TILES = RESERVED_TILES;

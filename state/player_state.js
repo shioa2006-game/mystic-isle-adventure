@@ -9,6 +9,18 @@
   const ITEM = Game.ITEM;
   const ITEM_META = Game.ITEM_META;
   const PRICE = Game.PRICE || {};
+  const ITEM_DATA = Game.ITEM_DATA || {};
+  const ITEM_CATEGORY = Game.ITEM_CATEGORY || {};
+
+  function getItemData(itemId) {
+    if (!itemId) return null;
+    return ITEM_DATA[itemId] || null;
+  }
+
+  function getItemName(itemId) {
+    const meta = ITEM_META[itemId];
+    return meta ? meta.name : itemId || "？？？";
+  }
 
   function createDefaultPlayer() {
     return {
@@ -102,7 +114,10 @@
 
   function addFood(player, amount) {
     const maxFood = Game.FOOD_CAP != null ? Game.FOOD_CAP : 999;
-    const clamp = Game.utils && typeof Game.utils.clamp === "function" ? Game.utils.clamp : (v, min, max) => Math.min(Math.max(v, min), max);
+    const clamp =
+      Game.utils && typeof Game.utils.clamp === "function"
+        ? Game.utils.clamp
+        : (v, min, max) => Math.min(Math.max(v, min), max);
     player.food = clamp(player.food + amount, 0, maxFood);
   }
 
@@ -126,13 +141,15 @@
     if (player.gold < price) {
       return { success: false, reason: "GOLD", message: "Gold が足りません。" };
     }
+    const itemInfo = getItemData(itemId);
     if (itemId === ITEM.FOOD10) {
       player.gold -= price;
-      addFood(player, 10);
-      return { success: true, itemId, message: "Food を 10 回復した。" };
+      const gain = (itemInfo && itemInfo.foodGain) || 10;
+      addFood(player, gain);
+      return { success: true, itemId, message: `Food が ${gain} 増えた。` };
     }
     if (isInventoryFull(player)) {
-      return { success: false, reason: "FULL", message: "インベントリがいっぱいです。" };
+      return { success: false, reason: "FULL", message: "インベントリに空きがありません。" };
     }
     addItem(player, itemId);
     player.gold -= price;
@@ -159,14 +176,14 @@
       return {
         success: false,
         reason: "EMPTY",
-        message: "そこにアイテムはない。",
+        message: "その位置にはアイテムがない。",
       };
     }
     if (isItemEquipped(player, index)) {
       return {
         success: false,
         reason: "EQUIPPED",
-        message: "装備中の物は売れない。",
+        message: "装備中のアイテムは売却できない。",
       };
     }
     const itemId = player.inventory[index];
@@ -193,129 +210,121 @@
       return {
         success: false,
         reason: "EMPTY",
-        message: "アイテムを選択していない。",
+        message: "アイテムが選択されていない。",
         consumed: false,
       };
     }
     const itemId = player.inventory[index];
-    switch (itemId) {
-      case ITEM.POTION: {
-        if (player.hp >= player.maxHp) {
-          return {
-            success: false,
-            reason: "FULL_HP",
-            message: "HP は満タンだ。",
-            consumed: false,
-          };
-        }
-        removeItemByIndex(player, index);
-        player.hp = Math.min(player.maxHp, player.hp + 20);
-        return {
-          success: true,
-          itemId,
-          message: "Potion で HP が回復した。",
-          consumed: true,
-        };
-      }
-      case ITEM.FOOD10:
-        addFood(player, 10);
-        return {
-          success: true,
-          itemId,
-          message: "Food を補給した。",
-          consumed: false,
-        };
-      case ITEM.BRONZE_SWORD: {
-        if (player.equip.weapon === index) {
-          player.equip.weapon = null;
-          return {
-            success: true,
-            itemId,
-            message: "Bronze Sword を外した。",
-            consumed: false,
-          };
-        }
-        if (player.equip.weapon !== null) {
-          return {
-            success: false,
-            reason: "SLOT_OCCUPIED",
-            message: "他の武器を装備中だ。",
-            consumed: false,
-          };
-        }
-        player.equip.weapon = index;
-        return {
-          success: true,
-          itemId,
-          message: "Bronze Sword を装備した。",
-          consumed: false,
-        };
-      }
-      case ITEM.WOOD_SHIELD: {
-        if (player.equip.shield === index) {
-          player.equip.shield = null;
-          return {
-            success: true,
-            itemId,
-            message: "Wood Shield を外した。",
-            consumed: false,
-          };
-        }
-        if (player.equip.shield !== null) {
-          return {
-            success: false,
-            reason: "SLOT_OCCUPIED",
-            message: "他の盾を装備中だ。",
-            consumed: false,
-          };
-        }
-        player.equip.shield = index;
-        return {
-          success: true,
-          itemId,
-          message: "Wood Shield を装備した。",
-          consumed: false,
-        };
-      }
-      case ITEM.ANCIENT_KEY:
-        return {
-          success: false,
-          reason: "LOCKED",
-          message: "ここでは使えない。",
-          consumed: false,
-        };
-      default:
-        return {
-          success: false,
-          reason: "UNKNOWN",
-          message: "よく分からないアイテムだ。",
-          consumed: false,
-        };
+    const itemData = getItemData(itemId);
+    if (!itemData) {
+      return {
+        success: false,
+        reason: "UNKNOWN",
+        message: "よく分からないアイテムだ。",
+        consumed: false,
+      };
     }
+    if (itemData.category === ITEM_CATEGORY.CONSUMABLE) {
+      if (itemId === ITEM.FOOD10) {
+        return {
+          success: false,
+          reason: "DIRECT",
+          message: "Food は購入すると直接補充される。",
+          consumed: false,
+        };
+      }
+      return consumeInventoryItem(player, index, itemId, itemData);
+    }
+    if (itemData.category === ITEM_CATEGORY.WEAPON) {
+      return toggleEquipmentSlot(player, index, "weapon", itemId);
+    }
+    if (itemData.category === ITEM_CATEGORY.SHIELD) {
+      return toggleEquipmentSlot(player, index, "shield", itemId);
+    }
+    return {
+      success: false,
+      reason: "UNUSABLE",
+      message: "ここでは使えない。",
+      consumed: false,
+    };
+  }
+
+  function consumeInventoryItem(player, index, itemId, itemData) {
+    const effect = itemData.consumableEffect || {};
+    if (effect.hp) {
+      if (player.hp >= player.maxHp) {
+        return {
+          success: false,
+          reason: "FULL_HP",
+          message: "HP はすでに最大だ。",
+          consumed: false,
+        };
+      }
+      const before = player.hp;
+      player.hp = Math.min(player.maxHp, player.hp + effect.hp);
+      const healed = player.hp - before;
+      removeItemByIndex(player, index);
+      return {
+        success: true,
+        itemId,
+        message: `${getItemName(itemId)} を使った。HP が ${healed} 回復した。`,
+        consumed: true,
+      };
+    }
+    return {
+      success: false,
+      reason: "NO_EFFECT",
+      message: "効果を発揮できなかった。",
+      consumed: false,
+    };
+  }
+
+  function toggleEquipmentSlot(player, index, slot, itemId) {
+    const currentIndex = player.equip[slot];
+    const itemName = getItemName(itemId);
+    if (currentIndex === index) {
+      player.equip[slot] = null;
+      return {
+        success: true,
+        itemId,
+        message: `${itemName} を外した。`,
+        consumed: false,
+      };
+    }
+    if (currentIndex !== null) {
+      return {
+        success: false,
+        reason: "SLOT_OCCUPIED",
+        message: slot === "weapon" ? "他の武器を装備中だ。" : "他の盾を装備中だ。",
+        consumed: false,
+      };
+    }
+    player.equip[slot] = index;
+    return {
+      success: true,
+      itemId,
+      message: `${itemName} を装備した。`,
+      consumed: false,
+    };
   }
 
   function getEffectiveStats(player) {
-    let atkBonus = 0;
-    let defBonus = 0;
-
-    if (player.equip.weapon !== null && player.equip.weapon < player.inventory.length) {
-      const weaponItem = player.inventory[player.equip.weapon];
-      if (weaponItem === ITEM.BRONZE_SWORD) {
-        atkBonus = (Game.EQUIP_BONUS && Game.EQUIP_BONUS.weapon) || 0;
-      }
-    }
-
-    if (player.equip.shield !== null && player.equip.shield < player.inventory.length) {
-      const shieldItem = player.inventory[player.equip.shield];
-      if (shieldItem === ITEM.WOOD_SHIELD) {
-        defBonus = (Game.EQUIP_BONUS && Game.EQUIP_BONUS.shield) || 0;
-      }
-    }
-
+    const atkBonus = getEquipStatBonus(player, "weapon", "atk");
+    const defBonus = getEquipStatBonus(player, "shield", "def");
     return {
       atk: player.atk + atkBonus,
       def: player.def + defBonus,
     };
+  }
+
+  function getEquipStatBonus(player, slot, statKey) {
+    const equipIndex = player.equip[slot];
+    if (equipIndex === null) return 0;
+    if (equipIndex < 0 || equipIndex >= player.inventory.length) return 0;
+    const itemId = player.inventory[equipIndex];
+    const data = getItemData(itemId);
+    if (!data || !data.equip) return 0;
+    return data.equip[statKey] || 0;
   }
 
   function grantExp(player, amount, pushMessage) {

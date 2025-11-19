@@ -30,7 +30,6 @@
    const ITEM_META = Game.ITEM_META;
    const INVENTORY_MAX = Game.INVENTORY_MAX;
    const FOOD_CAP = Game.FOOD_CAP;
-   const EQUIP_BONUS = Game.EQUIP_BONUS;
    const OVERLAY = Game.OVERLAY;
    const LAYER = Game.LAYER;
    const RESERVED_TILES = Game.RESERVED_TILES;

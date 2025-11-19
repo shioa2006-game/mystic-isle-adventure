@@ -2,12 +2,16 @@
    // ショップとのやり取りを管理
    const Game = (window.Game = window.Game || {});
 
-   const SHOP_ITEMS = [
-     Game.ITEM.FOOD10,
-     Game.ITEM.POTION,
-     Game.ITEM.BRONZE_SWORD,
-     Game.ITEM.WOOD_SHIELD,
-   ];
+  const SHOP_ITEMS = [
+    Game.ITEM.FOOD10,
+    Game.ITEM.POTION,
+    Game.ITEM.WOOD_SWORD,
+    Game.ITEM.BRONZE_SWORD,
+    Game.ITEM.IRON_SWORD,
+    Game.ITEM.WOOD_SHIELD,
+    Game.ITEM.BRONZE_SHIELD,
+    Game.ITEM.IRON_SHIELD,
+  ];
 
    function tryOpenShop() {
      const state = Game.state;
