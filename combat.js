@@ -117,8 +117,8 @@
     Game.grantExp(enemy.exp);
    Game.pushMessage({ text: `勝利！ EXP +${enemy.exp} / Gold +${enemy.gold}` });
 
-    // 1/3の確率でFood10をドロップ
-    if (Math.random() < 1/3) {
+    // 1/2の確率でFood10をドロップ
+    if (Math.random() < 1/2) {
       Game.state.player.food += 10;
       Game.pushMessage({ text: "Food+10を手に入れた" });
     }
