@@ -44,21 +44,41 @@
     return {
       questTalked: false,
       questGiven: false,
-      hasKey: false,
       openedChests: new Set(),
       cleared: false,
+      blacksmithGuardians: new Set(),
+      blacksmithFreed: false,
+      blacksmithRescued: false,
+      hasHammer: false,
+      cave2Unlocked: false,
+      hasOre: false,
+      holySwordCreated: false,
+      hasHolyShield: false,
+      dragonDefeated: false,
     };
   }
 
   function resetProgressFlags(flags) {
     flags.questTalked = false;
     flags.questGiven = false;
-    flags.hasKey = false;
     flags.cleared = false;
+    flags.blacksmithFreed = false;
+    flags.blacksmithRescued = false;
+    flags.hasHammer = false;
+    flags.cave2Unlocked = false;
+    flags.hasOre = false;
+    flags.holySwordCreated = false;
+    flags.hasHolyShield = false;
+    flags.dragonDefeated = false;
     if (!flags.openedChests) {
       flags.openedChests = new Set();
     } else {
       flags.openedChests.clear();
+    }
+    if (!flags.blacksmithGuardians) {
+      flags.blacksmithGuardians = new Set();
+    } else {
+      flags.blacksmithGuardians.clear();
     }
   }
 
@@ -88,6 +108,22 @@
   function addItem(player, itemId) {
     if (isInventoryFull(player)) return false;
     player.inventory.push(itemId);
+    return true;
+  }
+
+  function findItemIndex(player, itemId) {
+    if (!player || !player.inventory) return -1;
+    return player.inventory.findIndex((value) => value === itemId);
+  }
+
+  function hasItem(player, itemId) {
+    return findItemIndex(player, itemId) >= 0;
+  }
+
+  function removeItemById(player, itemId) {
+    const index = findItemIndex(player, itemId);
+    if (index === -1) return false;
+    removeItemByIndex(player, index);
     return true;
   }
 
@@ -161,8 +197,12 @@
     };
   }
 
+  function getItemPrice(itemId) {
+    return PRICE[itemId] || 0;
+  }
+
   function getSellPrice(itemId) {
-    const price = PRICE[itemId];
+    const price = getItemPrice(itemId);
     if (!price) return 0;
     return Math.floor(price / 2);
   }
@@ -361,6 +401,7 @@
     addItem,
     removeItemByIndex,
     describeItem,
+    getItemName,
     addFood,
     canBuy,
     buyItem,
@@ -369,5 +410,9 @@
     getEffectiveStats,
     isItemEquipped,
     grantExp,
+    findItemIndex,
+    hasItem,
+    removeItemById,
+    getItemPrice,
   };
 })();

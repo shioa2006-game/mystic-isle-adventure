@@ -153,16 +153,34 @@
       return {
         questTalked: false,
         questGiven: false,
-        hasKey: false,
         cleared: false,
+        blacksmithFreed: false,
+        blacksmithRescued: false,
+        blacksmithGuardians: [],
+        hasHammer: false,
+        cave2Unlocked: false,
+        hasOre: false,
+        holySwordCreated: false,
+        hasHolyShield: false,
+        dragonDefeated: false,
         openedChests: [],
       };
     }
     return {
       questTalked: !!flags.questTalked,
       questGiven: !!flags.questGiven,
-      hasKey: !!flags.hasKey,
       cleared: !!flags.cleared,
+      blacksmithFreed: !!flags.blacksmithFreed,
+      blacksmithRescued: !!flags.blacksmithRescued,
+      blacksmithGuardians: Array.isArray(flags.blacksmithGuardians)
+        ? flags.blacksmithGuardians.slice()
+        : Array.from(flags.blacksmithGuardians || []),
+      hasHammer: !!flags.hasHammer,
+      cave2Unlocked: !!flags.cave2Unlocked,
+      hasOre: !!flags.hasOre,
+      holySwordCreated: !!flags.holySwordCreated,
+      hasHolyShield: !!flags.hasHolyShield,
+      dragonDefeated: !!flags.dragonDefeated,
       openedChests: Array.isArray(flags.openedChests)
         ? flags.openedChests.slice()
         : Array.from(flags.openedChests || []),
@@ -202,6 +220,9 @@
 
     PlayerState.resetProgressFlags(Game.flags);
     applyProgressFlags(snapshot.progressFlags);
+    if (Game.story && typeof Game.story.syncWorldStateFromFlags === "function") {
+      Game.story.syncWorldStateFromFlags();
+    }
 
     Game.state.flags.dragonDefeated = snapshot.flags ? !!snapshot.flags.dragonDefeated : false;
     Game.state.flags.starvingNotified = false;
@@ -216,6 +237,9 @@
     }
 
     ensureSceneEnemies();
+    if (Game.story && typeof Game.story.ensureStoryEnemies === "function") {
+      Game.story.ensureStoryEnemies();
+    }
 
     if (Game.occupancy && typeof Game.occupancy.markDirty === "function") {
       Game.occupancy.markDirty();
@@ -251,17 +275,30 @@
     if (!raw) return;
     flags.questTalked = !!raw.questTalked;
     flags.questGiven = !!raw.questGiven;
-    flags.hasKey = !!raw.hasKey;
     flags.cleared = !!raw.cleared;
+    flags.blacksmithFreed = !!raw.blacksmithFreed;
+    flags.blacksmithRescued = !!raw.blacksmithRescued;
+    flags.hasHammer = !!raw.hasHammer;
+    flags.cave2Unlocked = !!raw.cave2Unlocked;
+    flags.hasOre = !!raw.hasOre;
+    flags.holySwordCreated = !!raw.holySwordCreated;
+    flags.hasHolyShield = !!raw.hasHolyShield;
+    flags.dragonDefeated = !!raw.dragonDefeated;
     if (!flags.openedChests) {
       flags.openedChests = new Set();
     } else {
       flags.openedChests.clear();
     }
     if (Array.isArray(raw.openedChests)) {
-      raw.openedChests.forEach((key) => {
-        flags.openedChests.add(key);
-      });
+      raw.openedChests.forEach((key) => flags.openedChests.add(key));
+    }
+    if (!flags.blacksmithGuardians) {
+      flags.blacksmithGuardians = new Set();
+    } else {
+      flags.blacksmithGuardians.clear();
+    }
+    if (Array.isArray(raw.blacksmithGuardians)) {
+      raw.blacksmithGuardians.forEach((key) => flags.blacksmithGuardians.add(key));
     }
   }
 

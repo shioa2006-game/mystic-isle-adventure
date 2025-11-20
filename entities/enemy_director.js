@@ -100,6 +100,9 @@
     if (removed && removed.kind === types.ENEMY_KIND.DRAGON) {
       Game.state.flags.dragonDefeated = true;
     }
+    if (Game.story && typeof Game.story.onEnemyDefeated === "function") {
+      Game.story.onEnemyDefeated(removed);
+    }
     Game.state.enemyRespawnSteps = 0;
     Game.occupancy.markDirty();
     spawnDragonIfNeeded();
@@ -183,6 +186,13 @@
     return enemy;
   }
 
+  function spawnFixedEnemy(kind, scene, pos, overrides = {}) {
+    const enemy = createEnemyInstance(kind, scene, pos);
+    Game.state.enemies.push(Object.assign(enemy, overrides));
+    Game.occupancy.markDirty();
+    return enemy;
+  }
+
   function findSpawnLocation(scene, map, minDistance) {
     const maxAttempts = 200;
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
@@ -258,5 +268,6 @@
     removeEnemyById,
     moveEnemiesTowardPlayer,
     spawnDragonIfNeeded,
+    spawnFixedEnemy,
   };
 })();

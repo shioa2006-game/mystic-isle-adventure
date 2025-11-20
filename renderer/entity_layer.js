@@ -50,6 +50,9 @@
     if (Game.state.priest) {
       actors.push({ kind: Game.entities.ACTOR_KIND.PRIEST, data: Game.state.priest });
     }
+    if (Game.state.blacksmith) {
+      actors.push({ kind: Game.entities.ACTOR_KIND.BLACKSMITH, data: Game.state.blacksmith });
+    }
     actors.forEach((entry) => {
       if (!entry.data || entry.data.scene !== Game.state.scene) return;
       const ok = Game.entities.drawActor(

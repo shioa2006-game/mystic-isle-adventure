@@ -98,6 +98,22 @@
       Game.dialogue.talk("priest");
       return;
     }
+    if (
+      Game.state.blacksmith &&
+      Game.utils.isAdjacent(pos, Game.state.blacksmith.pos) &&
+      Game.state.scene === Game.state.blacksmith.scene
+    ) {
+      if (
+        Game.dialogue &&
+        typeof Game.dialogue.talk === "function" &&
+        Game.story &&
+        typeof Game.story.canTalkToBlacksmith === "function" &&
+        Game.story.canTalkToBlacksmith()
+      ) {
+        Game.dialogue.talk("blacksmith");
+      }
+      return;
+    }
     if (Game.dialogue && typeof Game.dialogue.talk === "function") {
       Game.dialogue.talk("default");
       return;

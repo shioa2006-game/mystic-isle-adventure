@@ -248,11 +248,8 @@
   };
 
   Game.EVENTS = {
-    [scenes.CAVE_B2]: {
-      chests: [{ x: 1, y: 1 }],
-    },
     [scenes.FIELD]: {
       ruins: { x: 5, y: 5 },
      },
    };
- })();
+})();

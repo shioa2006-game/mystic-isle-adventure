@@ -4,8 +4,10 @@
 
   const STORY_PHASE = Object.freeze({
     START: 0,
-    QUEST_GIVEN: 1,
-    KEY_OBTAINED: 2,
+    BLACKSMITH_RESCUED: 1,
+    ORE_OBTAINED: 2,
+    HOLY_SWORD_CREATED: 3,
+    DRAGON_DEFEATED: 4,
   });
 
   const dialogueState = {
@@ -144,7 +146,16 @@
       return;
     }
 
-    const phase = getCurrentPhase();
+    if (
+      characterId === "blacksmith" &&
+      (!Game.story ||
+        typeof Game.story.canTalkToBlacksmith !== "function" ||
+        !Game.story.canTalkToBlacksmith())
+    ) {
+      return;
+    }
+
+    const phase = getPhaseForCharacter(characterId);
     const found = findLines(characterId, phase);
     if (!found) {
       pushFallbackMessage();
@@ -189,15 +200,46 @@
 
   function completeSession() {
     const session = dialogueState.session;
-    if (
-      session.characterId === "king" &&
-      session.phase === STORY_PHASE.START &&
-      Game.flags
-    ) {
+    if (session.characterId === "king" && session.phase === STORY_PHASE.START && Game.flags) {
       Game.flags.questTalked = true;
+      Game.flags.questGiven = true;
     }
     if (session.characterId === "priest" && Game.saveSystem && typeof Game.saveSystem.requestSave === "function") {
       Game.saveSystem.requestSave();
+    }
+    if (
+      session.characterId === "blacksmith" &&
+      Game.flags &&
+      Game.flags.blacksmithFreed &&
+      !Game.flags.blacksmithRescued &&
+      Game.story &&
+      typeof Game.story.finalizeBlacksmithRescue === "function"
+    ) {
+      Game.story.finalizeBlacksmithRescue();
+    }
+    if (
+      session.characterId === "blacksmith" &&
+      session.phase === STORY_PHASE.BLACKSMITH_RESCUED &&
+      Game.story &&
+      typeof Game.story.tryGivePowerHammer === "function"
+    ) {
+      Game.story.tryGivePowerHammer();
+    }
+    if (
+      session.characterId === "blacksmith" &&
+      session.phase === STORY_PHASE.ORE_OBTAINED &&
+      Game.story &&
+      typeof Game.story.tryForgeHolySword === "function"
+    ) {
+      Game.story.tryForgeHolySword();
+    }
+    if (
+      session.characterId === "king" &&
+      session.phase === STORY_PHASE.HOLY_SWORD_CREATED &&
+      Game.story &&
+      typeof Game.story.tryGrantHolyShield === "function"
+    ) {
+      Game.story.tryGrantHolyShield();
     }
     // 空行はstartSession()で追加済みなので、ここでは追加しない
     // クールダウンを有効化（次の移動まで会話を開始できない）
@@ -220,9 +262,18 @@
 
   function getCurrentPhase() {
     const story = Game.flags || {};
-    if (story.hasKey) return STORY_PHASE.KEY_OBTAINED;
-    if (story.questGiven) return STORY_PHASE.QUEST_GIVEN;
+    if (story.dragonDefeated) return STORY_PHASE.DRAGON_DEFEATED;
+    if (story.holySwordCreated) return STORY_PHASE.HOLY_SWORD_CREATED;
+    if (story.hasOre) return STORY_PHASE.ORE_OBTAINED;
+    if (story.blacksmithRescued) return STORY_PHASE.BLACKSMITH_RESCUED;
     return STORY_PHASE.START;
+  }
+
+  function getPhaseForCharacter(characterId) {
+    if (characterId === "blacksmith" && !Game.flags.blacksmithRescued) {
+      return STORY_PHASE.START;
+    }
+    return getCurrentPhase();
   }
 
   function isLoaded() {

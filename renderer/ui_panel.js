@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   // 下部パネルの描画
   const Game = (window.Game = window.Game || {});
   const { layout } = Game.rendererLayout;
@@ -70,7 +70,6 @@
     p.rect(x, y, layout.panelWidth, layout.panelHeight);
     p.textAlign(p.LEFT, p.TOP);
     p.textSize(16);
-    const keyStatus = Game.flags && Game.flags.hasKey ? "あり" : "なし";
     const isLowHp = player.hp <= player.maxHp / 5;
     p.fill(isLowHp ? p.color(255, 100, 100) : 240);
     p.text(`HP: ${player.hp}/${player.maxHp}`, x + 12, y + 12);
@@ -78,9 +77,10 @@
     p.text(`LV: ${player.lv}  EXP: ${player.exp}`, x + 220, y + 12);
     const weaponName = resolveEquippedName(player, "weapon");
     const shieldName = resolveEquippedName(player, "shield");
+    const storyLabel = resolveStoryItemLabel();
     const lines = [
       `ATK/DEF: ${stats.atk} / ${stats.def}`,
-      `Food: ${player.food}  Gold: ${player.gold}  Key: ${keyStatus}`,
+      `Food: ${player.food}  Gold: ${player.gold}  Story: ${storyLabel}`,
       `Weapon: ${weaponName}  Shield: ${shieldName}`,
     ];
     lines.forEach((line, index) => {
@@ -97,6 +97,17 @@
     if (!itemId) return "-";
     const meta = Game.ITEM_META ? Game.ITEM_META[itemId] : null;
     return (meta && meta.name) || itemId || "-";
+  }
+
+  function resolveStoryItemLabel() {
+    const flags = Game.flags || {};
+    if (flags.hasHammer && !flags.cave2Unlocked) {
+      return "Power Hammer";
+    }
+    if (flags.hasOre && !flags.holySwordCreated) {
+      return "Holy Ore";
+    }
+    return "-";
   }
 
   Game.rendererLayers = Game.rendererLayers || {};

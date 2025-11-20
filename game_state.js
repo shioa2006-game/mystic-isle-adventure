@@ -57,6 +57,18 @@
   }
   const ENEMY_DATA = Game.ENEMY_DATA;
 
+  function getEnemyKindValue(key) {
+    const kinds = (Game.entityTypes && Game.entityTypes.ENEMY_KIND) || {};
+    return kinds[key] || key;
+  }
+
+  const BLACKSMITH_CAVE_POS = Object.freeze({ x: 1, y: 1 });
+  const BLACKSMITH_TOWN_POS = Object.freeze({ x: 21, y: 2 });
+  const BLACKSMITH_GUARD_POSITIONS = [
+    { x: 2, y: 1 },
+    { x: 1, y: 2 },
+  ];
+
   const progressFlags = PlayerState.createProgressFlags();
 
    const battleState = {
@@ -93,6 +105,10 @@
        scene: SCENE.TOWN,
        pos: { x: 15, y: 2 },
      },
+     blacksmith: {
+       scene: SCENE.CAVE_B2,
+       pos: { x: BLACKSMITH_CAVE_POS.x, y: BLACKSMITH_CAVE_POS.y },
+     },
      flags: {
        starvingNotified: false,
        dragonDefeated: false,
@@ -100,6 +116,202 @@
      battle: battleState,
    };
 
+  function clonePos(pos) {
+    return { x: pos.x, y: pos.y };
+  }
+
+  function syncWorldStateFromFlags() {
+    if (progressFlags.blacksmithRescued) {
+      moveBlacksmithToTown();
+    } else {
+      state.blacksmith.scene = SCENE.CAVE_B2;
+      state.blacksmith.pos = clonePos(BLACKSMITH_CAVE_POS);
+    }
+    ensureStoryEnemies();
+  }
+
+  function ensureStoryEnemies() {
+    spawnBlacksmithGuardians();
+  }
+
+  function spawnBlacksmithGuardians() {
+    if (progressFlags.blacksmithRescued || progressFlags.blacksmithFreed) return;
+    if (!Game.entities || typeof Game.entities.spawnFixedEnemy !== "function") return;
+    const vampireKind = getEnemyKindValue("VAMPIRE");
+    BLACKSMITH_GUARD_POSITIONS.forEach((pos) => {
+      const exists = state.enemies.some(
+        (enemy) =>
+          enemy.scene === SCENE.CAVE_B2 &&
+          enemy.kind === vampireKind &&
+          enemy.pos.x === pos.x &&
+          enemy.pos.y === pos.y
+      );
+      if (!exists) {
+        Game.entities.spawnFixedEnemy(vampireKind, SCENE.CAVE_B2, pos, {
+          persistent: true,
+          guardianKey: guardianKey(pos),
+        });
+      }
+    });
+  }
+
+  function guardianKey(pos) {
+    return `${pos.x},${pos.y}`;
+  }
+
+  function handleBlacksmithGuardianDefeat(enemy) {
+    const pos = enemy && enemy.pos ? enemy.pos : { x: 0, y: 0 };
+    if (!progressFlags.blacksmithGuardians) {
+      progressFlags.blacksmithGuardians = new Set();
+    }
+    const key = enemy && enemy.guardianKey ? enemy.guardianKey : guardianKey(pos);
+    progressFlags.blacksmithGuardians.add(key);
+    const needed = BLACKSMITH_GUARD_POSITIONS.length;
+    if (progressFlags.blacksmithGuardians.size >= needed && !progressFlags.blacksmithFreed) {
+      progressFlags.blacksmithFreed = true;
+      pushMessage({ text: "鍛冶屋を囲んでいた魔物を倒した！" });
+      pushMessage({ text: "Tキーで話しかけて救出しよう。" });
+    }
+  }
+
+  function finalizeBlacksmithRescue() {
+    if (!progressFlags.blacksmithFreed || progressFlags.blacksmithRescued) return;
+    progressFlags.blacksmithRescued = true;
+    progressFlags.blacksmithFreed = false;
+    moveBlacksmithToTown();
+    pushMessage({ text: "鍛冶屋は無事に街へ戻っていった。" });
+    markOccupancyDirty();
+    ensureOccupancy();
+  }
+
+  function moveBlacksmithToTown() {
+    state.blacksmith.scene = SCENE.TOWN;
+    state.blacksmith.pos = clonePos(BLACKSMITH_TOWN_POS);
+  }
+
+  function canTalkToBlacksmith() {
+    return progressFlags.blacksmithFreed || progressFlags.blacksmithRescued;
+  }
+
+  function tryGivePowerHammer() {
+    if (!progressFlags.blacksmithRescued || progressFlags.hasHammer) return;
+    const result = forceAddStoryItem(ITEM.POWER_HAMMER);
+    if (!result.success) {
+      pushMessage({ text: "インベントリの空きが必要だ。" });
+      return;
+    }
+    progressFlags.hasHammer = true;
+    if (result.replaced) {
+      pushMessage({ text: `${result.replaced}と入れ替えてPower Hammer を受け取った。` });
+    } else {
+      pushMessage({ text: "Power Hammer を受け取った。" });
+    }
+  }
+
+  function tryForgeHolySword() {
+    if (!progressFlags.hasOre || progressFlags.holySwordCreated) return;
+    const player = state.player;
+    if (!PlayerState.hasItem(player, ITEM.IRON_SWORD)) {
+      pushMessage({ text: "鉄の剣を持っていないため、鍛冶が始められない。" });
+      return;
+    }
+    if (!PlayerState.hasItem(player, ITEM.HOLY_ORE)) {
+      pushMessage({ text: "聖鉱石を所持していない。" });
+      progressFlags.hasOre = false;
+      return;
+    }
+    PlayerState.removeItemById(player, ITEM.IRON_SWORD);
+    PlayerState.removeItemById(player, ITEM.HOLY_ORE);
+    progressFlags.hasOre = false;
+    const result = forceAddStoryItem(ITEM.HOLY_SWORD);
+    if (!result.success) {
+      pushMessage({ text: "インベントリに空きが必要だ。" });
+      return;
+    }
+    progressFlags.holySwordCreated = true;
+    pushMessage({ text: "鍛冶屋が聖剣を鍛え上げた！" });
+    if (result.replaced) {
+      pushMessage({ text: `${result.replaced}と入れ替えて聖剣を受け取った。` });
+    }
+  }
+
+  function tryGrantHolyShield() {
+    if (!progressFlags.holySwordCreated || progressFlags.hasHolyShield) return;
+    const result = forceAddStoryItem(ITEM.HOLY_SHIELD);
+    if (!result.success) {
+      pushMessage({ text: "インベントリの整理が必要だ。" });
+      return;
+    }
+    progressFlags.hasHolyShield = true;
+    if (result.replaced) {
+      pushMessage({ text: `${result.replaced}と入れ替えて聖盾を授かった。` });
+    } else {
+      pushMessage({ text: "聖盾を授かった！" });
+    }
+  }
+
+  function consumePowerHammer() {
+    if (!progressFlags.hasHammer) return false;
+    progressFlags.hasHammer = false;
+    progressFlags.cave2Unlocked = true;
+    PlayerState.removeItemById(state.player, ITEM.POWER_HAMMER);
+    return true;
+  }
+
+  function forceAddStoryItem(itemId) {
+    if (PlayerState.addItem(state.player, itemId)) {
+      return { success: true };
+    }
+    const index = selectReplacementIndex();
+    if (index === -1) {
+      return { success: false };
+    }
+    const removedId = state.player.inventory[index];
+    const removedName = PlayerState.getItemName(removedId);
+    PlayerState.removeItemByIndex(state.player, index);
+    PlayerState.addItem(state.player, itemId);
+    return { success: true, replaced: removedName };
+  }
+
+  function selectReplacementIndex() {
+    const player = state.player;
+    if (!player || !player.inventory.length) return -1;
+    const entries = player.inventory.map((itemId, index) => ({
+      index,
+      price: PlayerState.getItemPrice(itemId),
+      equipped: PlayerState.isItemEquipped(player, index),
+    }));
+    let candidates = entries.filter((entry) => !entry.equipped);
+    if (!candidates.length) {
+      candidates = entries;
+    }
+    candidates.sort((a, b) => {
+      if (a.price !== b.price) return a.price - b.price;
+      return a.index - b.index;
+    });
+    return candidates.length ? candidates[0].index : -1;
+  }
+
+  function onEnemyDefeated(enemy) {
+    if (!enemy) return;
+    const isGuardian =
+      enemy &&
+      enemy.guardianKey != null &&
+      enemy.scene === SCENE.CAVE_B2 &&
+      enemy.kind === getEnemyKindValue("VAMPIRE");
+    if (
+      isGuardian ||
+      (enemy.scene === SCENE.CAVE_B2 &&
+        enemy.kind === getEnemyKindValue("VAMPIRE") &&
+        BLACKSMITH_GUARD_POSITIONS.some((pos) => pos.x === enemy.pos.x && pos.y === enemy.pos.y))
+    ) {
+      handleBlacksmithGuardianDefeat(enemy);
+    }
+    if (enemy.kind === getEnemyKindValue("DRAGON")) {
+      progressFlags.dragonDefeated = true;
+      state.flags.dragonDefeated = true;
+    }
+  }
 
   function normalizeMessageEntry(message, meta = {}) {
 
@@ -223,12 +435,13 @@
      } else {
        setPlayerPosition({ x: 0, y: 0 });
      }
-     markOccupancyDirty();
      if (Game.entities && typeof Game.entities.spawnInitialEnemies === "function") {
        Game.entities.spawnInitialEnemies();
      } else {
        ensureSceneEnemies(state.scene);
      }
+     syncWorldStateFromFlags();
+     markOccupancyDirty();
      ensureOccupancy();
    }
 
@@ -296,29 +509,23 @@
        pushMessage({ text: "宝箱はすでに開いている。" });
        return;
      }
-     PlayerState.markChestOpened(progressFlags, scene, x, y);
-     progressFlags.hasKey = true;
-     pushMessage({ text: "宝箱を開けた！ Ancient Key を手に入れた。" });
+     PlayerState.markChestOpened(progressFlags, scene, x, y);     pushMessage({ text: "古い宝箱は既に空っぽだった。" });
      markOccupancyDirty();
      ensureOccupancy();
    }
 
-   function handleRuinsEvent(scene, x, y) {
-     if (progressFlags.cleared) {
-      pushMessage({ text: "扉はすでに開いている。" });
-       return;
-     }
-     if (!progressFlags.hasKey) {
-      pushMessage({ text: "重い扉だ…鍵が必要だ。" });
-       return;
-     }
-     progressFlags.cleared = true;
-    pushMessage({ text: "扉が開いた！" });
-    if (Game.ui && typeof Game.ui.close === "function") {
-      Game.ui.close();
+  function handleRuinsEvent(scene, x, y) {
+    if (!progressFlags.blacksmithRescued) {
+      pushMessage({ text: "鍛冶屋を救い出すまでは遺跡へ向かえない。" });
+      return;
     }
-     resetBattleState();
-   }
+    if (!progressFlags.holySwordCreated || !progressFlags.hasHolyShield) {
+      pushMessage({ text: "聖剣と聖盾を揃えてから挑もう。" });
+      return;
+    }
+    pushMessage({ text: "遺跡の内部は現在制作中です。" });
+  }
+
 
    function isInventoryFull() {
      return PlayerState.isInventoryFull(state.player);
@@ -414,13 +621,24 @@
    Game.getPlayerEffectiveStats = getPlayerEffectiveStats;
    Game.isItemEquipped = isItemEquipped;
    Game.grantExp = grantExp;
-   Game.resetPlayerToSafePoint = resetPlayerToSafePoint;
-   Game.resetForNewGame = resetForNewGame;
+  Game.resetPlayerToSafePoint = resetPlayerToSafePoint;
+  Game.resetForNewGame = resetForNewGame;
   Game.makePosKey = PlayerState.makePosKey;
   Game.hasOpened = (scene, x, y) => PlayerState.hasOpenedChest(progressFlags, scene, x, y);
   Game.markOpened = (scene, x, y) => PlayerState.markChestOpened(progressFlags, scene, x, y);
   Game.nextEnemyInstanceId = nextEnemyInstanceId;
   Game.battle = battleState;
+  Game.story = {
+    syncWorldStateFromFlags,
+    ensureStoryEnemies,
+    onEnemyDefeated,
+    finalizeBlacksmithRescue,
+    tryGivePowerHammer,
+    tryForgeHolySword,
+    tryGrantHolyShield,
+    canTalkToBlacksmith,
+    consumePowerHammer,
+  };
   if (Game.occupancy) {
     Game.occupancy.resolveTileEvent = resolveTileEvent;
   }

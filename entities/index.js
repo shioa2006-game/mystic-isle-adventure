@@ -17,6 +17,8 @@
     if (king && king.scene === scene && king.pos.x === x && king.pos.y === y) return true;
     const priest = Game.state.priest;
     if (priest && priest.scene === scene && priest.pos.x === x && priest.pos.y === y) return true;
+    const blacksmith = Game.state.blacksmith;
+    if (blacksmith && blacksmith.scene === scene && blacksmith.pos.x === x && blacksmith.pos.y === y) return true;
     return Game.state.enemies.some(
       (enemy) => enemy.scene === scene && enemy.pos.x === x && enemy.pos.y === y
     );
@@ -37,6 +39,7 @@
     removeEnemyById: director.removeEnemyById,
     moveEnemiesTowardPlayer: director.moveEnemiesTowardPlayer,
     spawnDragonIfNeeded: director.spawnDragonIfNeeded,
+    spawnFixedEnemy: director.spawnFixedEnemy,
     isOccupiedByEntity,
   };
 })();

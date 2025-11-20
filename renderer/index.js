@@ -1,25 +1,25 @@
-(function () {
+﻿(function () {
   // レンダラーのエントリポイント
   const Game = (window.Game = window.Game || {});
-  const layers = Game.rendererLayers || {};
 
-  function getLayer(name) {
+  function invokeLayer(name) {
+    const layers = Game.rendererLayers || {};
     const fn = layers[name];
-    if (typeof fn === "function") return fn;
-    return () => {};
+    if (typeof fn === "function") {
+      fn();
+    }
   }
 
   const rendererFacade = {
-    drawMap: getLayer("drawMap"),
-    drawEntities: getLayer("drawEntities"),
-    drawUI: getLayer("drawUI"),
-    drawOverlays: getLayer("drawOverlays"),
-    drawBattleOverlay: getLayer("drawBattleOverlay"),
-    drawClearOverlay: getLayer("drawClearOverlay"),
+    drawMap: () => invokeLayer("drawMap"),
+    drawEntities: () => invokeLayer("drawEntities"),
+    drawUI: () => invokeLayer("drawUI"),
+    drawOverlays: () => invokeLayer("drawOverlays"),
+    drawBattleOverlay: () => invokeLayer("drawBattleOverlay"),
+    drawClearOverlay: () => invokeLayer("drawClearOverlay"),
   };
 
   rendererFacade.drawAll = function drawAll() {
-    // 描画順を一元管理しておき、将来のレイヤー追加にも備える
     rendererFacade.drawMap();
     rendererFacade.drawEntities();
     rendererFacade.drawUI();
