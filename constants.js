@@ -112,7 +112,13 @@
   const NO_ENEMY_RADIUS = 1;
   const MAX_MESSAGES = 4;
 
-  const LV_THRESH = Object.freeze([10, 30, 60, 100, 150, 210, 280, 360, 440]);
+  // レベルnに到達するために必要な累積経験値を計算
+  // 数式: 5 × n × (n - 1)
+  // 例: LV2=10, LV3=30, LV4=60, LV5=100, ..., LV10=450, LV99=48,510
+  function getExpForLevel(level) {
+    if (level <= 1) return 0;
+    return 5 * level * (level - 1);
+  }
 
   Game.SCENE = SCENE;
   Game.TILE = TILE;
@@ -127,5 +133,5 @@
   Game.RESERVED_TILES = RESERVED_TILES;
   Game.NO_ENEMY_RADIUS = NO_ENEMY_RADIUS;
   Game.MAX_MESSAGES = MAX_MESSAGES;
-  Game.LV_THRESH = LV_THRESH;
+  Game.getExpForLevel = getExpForLevel;
 })();
