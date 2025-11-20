@@ -330,12 +330,12 @@
   function grantExp(player, amount, pushMessage) {
     player.exp += amount;
     let leveled = false;
-    const thresholds = Game.LV_THRESH || [];
-    while (true) {
-      const target = thresholds[player.lv - 1];
-      if (target == null) break;
-      if (player.exp < target) break;
-      player.lv += 1;
+    const maxLevel = 99; // 最大レベル
+    while (player.lv < maxLevel) {
+      const nextLevel = player.lv + 1;
+      const requiredExp = Game.getExpForLevel(nextLevel);
+      if (player.exp < requiredExp) break;
+      player.lv = nextLevel;
       player.maxHp += 5;
       if (player.lv % 2 === 0) {
         player.atk += 1;
