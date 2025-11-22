@@ -289,7 +289,7 @@
 
   function getCurrentPhase() {
     const story = Game.flags || {};
-    if (story.dragonDefeated) return STORY_PHASE.DRAGON_DEFEATED;
+    if (story.dragonDefeated) return STORY_PHASE.DRAGON_DEFEATED;// 将来の拡張用（現在はエンディング画面に直接遷移）
     if (story.holySwordCreated) return STORY_PHASE.HOLY_SWORD_CREATED;
     if (story.hasOre) return STORY_PHASE.ORE_OBTAINED;
     if (story.blacksmithRescued) return STORY_PHASE.BLACKSMITH_RESCUED;
