@@ -552,10 +552,6 @@
   }
 
   function handleRuinsEntranceEvent(warpData) {
-    if (!progressFlags.blacksmithRescued) {
-      pushMessage({ text: "鍛冶屋を救出するまで遺跡には入れない。" });
-      return;
-    }
     // 遺跡にはいつでも入れるが、聖剣・聖盾がないと竜を倒せない
     switchScene(warpData.targetScene, warpData.targetSpawn);
   }
