@@ -7,7 +7,7 @@
     BLACKSMITH_RESCUED: 1,
     ORE_OBTAINED: 2,
     HOLY_SWORD_CREATED: 3,
-    DRAGON_DEFEATED: 4,
+    DRAGON_DEFEATED: 4,// 将来の拡張用（現在はエンディング画面に直接遷移）
   });
 
   const dialogueState = {
