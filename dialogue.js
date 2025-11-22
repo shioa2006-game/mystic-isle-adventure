@@ -114,6 +114,17 @@
   function findLines(characterId, phase) {
     const character = getCharacter(characterId);
     if (!character || !character.dialogues) return null;
+
+    // アイテム受け取り済みの場合、特別なセリフキーをチェック
+    const specialKey = getSpecialDialogueKey(characterId, phase);
+    if (specialKey) {
+      const specialLines = character.dialogues[specialKey];
+      if (Array.isArray(specialLines) && specialLines.length > 0) {
+        return { lines: specialLines, phase };
+      }
+    }
+
+    // 通常のフェーズベースのセリフ検索（フォールバック機能付き）
     let target = phase;
     while (target >= 0) {
       const key = String(target);
@@ -123,6 +134,22 @@
       }
       target -= 1;
     }
+    return null;
+  }
+
+  function getSpecialDialogueKey(characterId, phase) {
+    const flags = Game.flags || {};
+
+    // 鍛冶屋フェーズ1: 力のハンマー受け取り済み
+    if (characterId === "blacksmith" && phase === STORY_PHASE.BLACKSMITH_RESCUED && flags.hasHammer) {
+      return "1_after_hammer";
+    }
+
+    // 王様フェーズ3: 聖盾受け取り済み
+    if (characterId === "king" && phase === STORY_PHASE.HOLY_SWORD_CREATED && flags.hasHolyShield) {
+      return "3_after_shield";
+    }
+
     return null;
   }
 
