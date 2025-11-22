@@ -137,17 +137,17 @@
   function spawnBlacksmithGuardians() {
     if (progressFlags.blacksmithRescued || progressFlags.blacksmithFreed) return;
     if (!Game.entities || typeof Game.entities.spawnFixedEnemy !== "function") return;
-    const vampireKind = getEnemyKindValue("WOLF");
+    const guardianKind = getEnemyKindValue("SKELETON");
     BLACKSMITH_GUARD_POSITIONS.forEach((pos) => {
       const exists = state.enemies.some(
         (enemy) =>
           enemy.scene === SCENE.CAVE_B2 &&
-          enemy.kind === vampireKind &&
+          enemy.kind === guardianKind &&
           enemy.pos.x === pos.x &&
           enemy.pos.y === pos.y
       );
       if (!exists) {
-        Game.entities.spawnFixedEnemy(vampireKind, SCENE.CAVE_B2, pos, {
+        Game.entities.spawnFixedEnemy(guardianKind, SCENE.CAVE_B2, pos, {
           persistent: true,
           guardianKey: guardianKey(pos),
         });
@@ -298,11 +298,11 @@
       enemy &&
       enemy.guardianKey != null &&
       enemy.scene === SCENE.CAVE_B2 &&
-      enemy.kind === getEnemyKindValue("WOLF");
+      enemy.kind === getEnemyKindValue("SKELETON");
     if (
       isGuardian ||
       (enemy.scene === SCENE.CAVE_B2 &&
-        enemy.kind === getEnemyKindValue("WOLF") &&
+        enemy.kind === getEnemyKindValue("SKELETON") &&
         BLACKSMITH_GUARD_POSITIONS.some((pos) => pos.x === enemy.pos.x && pos.y === enemy.pos.y))
     ) {
       handleBlacksmithGuardianDefeat(enemy);
