@@ -556,10 +556,7 @@
       pushMessage({ text: "鍛冶屋を救出するまで遺跡には入れない。" });
       return;
     }
-    if (!progressFlags.holySwordCreated || !progressFlags.hasHolyShield) {
-      pushMessage({ text: "聖剣と聖盾が揃っていないと遺跡の結界は越えられない。" });
-      return;
-    }
+    // 遺跡にはいつでも入れるが、聖剣・聖盾がないと竜を倒せない
     switchScene(warpData.targetScene, warpData.targetSpawn);
   }
 
