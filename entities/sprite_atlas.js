@@ -45,7 +45,14 @@
     const baseY = useScreen ? gridY : gridY * tileSize;
     const screenX = baseX + offsetX;
     const screenY = baseY + offsetY;
-    const sx = spriteIndex * enemySprite.size;
+    let sx = 0;
+    let sy = 0;
+    if (typeof spriteIndex === "number") {
+      sx = spriteIndex * enemySprite.size;
+    } else {
+      sx = (spriteIndex.x || 0) * enemySprite.size;
+      sy = (spriteIndex.y || 0) * enemySprite.size;
+    }
     g.push();
     g.imageMode(g.CORNER);
     g.image(
@@ -55,7 +62,7 @@
       drawSize,
       drawSize,
       sx,
-      0,
+      sy,
       enemySprite.size,
       enemySprite.size
     );

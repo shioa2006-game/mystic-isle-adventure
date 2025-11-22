@@ -1,5 +1,5 @@
 (function () {
-  // 敵の出現と AI を担当
+  // 敵の出現と AI を管理
   const Game = (window.Game = window.Game || {});
   const types = Game.entityTypes || {};
   const rules = types.enemyRules || {};
@@ -9,42 +9,56 @@
     MAX_FIELD_ENEMIES = 5,
     MIN_CAVE_ENEMIES = 2,
     MAX_CAVE_ENEMIES = 4,
+    MIN_CAVE2_ENEMIES = 2,
+    MAX_CAVE2_ENEMIES = 4,
+    MIN_RUINS_ENEMIES = 2,
+    MAX_RUINS_ENEMIES = 4,
     RESPAWN_STEP_THRESHOLD = 20,
     SAFE_DISTANCE_FROM_PLAYER = 4,
     ENEMY_CHASE_DISTANCE = 7,
   } = rules;
 
-  const DRAGON_SCENE = Game.SCENE.FIELD;
+  const DRAGON_SCENE = Game.SCENE.RUINS_B2;
 
   function spawnInitialEnemies() {
     Game.state.enemies = [];
     ensureFieldEnemies();
     ensureCaveEnemies(Game.SCENE.CAVE);
     ensureCaveEnemies(Game.SCENE.CAVE_B2);
+    ensureCave2Enemies(Game.SCENE.CAVE2);
+    ensureCave2Enemies(Game.SCENE.CAVE2_B2);
+    ensureRuinsEnemies(Game.SCENE.RUINS);
+    ensureRuinsEnemies(Game.SCENE.RUINS_B2);
     spawnDragonIfNeeded();
   }
 
   function ensureFieldEnemies() {
-    ensureSceneEnemies(Game.SCENE.FIELD, MIN_FIELD_ENEMIES, MAX_FIELD_ENEMIES);
+    ensureSceneEnemies(Game.SCENE.FIELD, MIN_FIELD_ENEMIES, MAX_FIELD_ENEMIES, spawnFieldEnemy);
   }
 
   function ensureCaveEnemies(scene) {
-    ensureSceneEnemies(scene, MIN_CAVE_ENEMIES, MAX_CAVE_ENEMIES);
+    ensureSceneEnemies(scene, MIN_CAVE_ENEMIES, MAX_CAVE_ENEMIES, () => spawnCaveEnemy(scene));
   }
 
-  function ensureSceneEnemies(scene, minCount, maxCount) {
+  function ensureCave2Enemies(scene) {
+    ensureSceneEnemies(scene, MIN_CAVE2_ENEMIES, MAX_CAVE2_ENEMIES, () => spawnCave2Enemy(scene));
+  }
+
+  function ensureRuinsEnemies(scene) {
+    ensureSceneEnemies(scene, MIN_RUINS_ENEMIES, MAX_RUINS_ENEMIES, () => spawnRuinsEnemy(scene));
+  }
+
+  function ensureSceneEnemies(scene, minCount, maxCount, spawnFn) {
+    if (!spawnFn) return;
     const current = Game.state.enemies.filter((enemy) => enemy.scene === scene);
-    if (current.length >= minCount) return;
-    const needed = Math.max(0, minCount - current.length);
-    for (let i = 0; i < needed; i += 1) {
-      if (scene === Game.SCENE.FIELD) {
-        spawnFieldEnemy();
-      } else {
-        spawnCaveEnemy(scene);
+    if (current.length < minCount) {
+      const needed = Math.max(0, minCount - current.length);
+      for (let i = 0; i < needed; i += 1) {
+        spawnFn();
       }
     }
-    const capped = Game.state.enemies.filter((enemy) => enemy.scene === scene);
-    if (capped.length > maxCount) {
+    const refreshed = Game.state.enemies.filter((enemy) => enemy.scene === scene);
+    if (refreshed.length > maxCount) {
       Game.state.enemies = Game.state.enemies.filter(
         (enemy) => !(enemy.scene === scene && !enemy.persistent)
       );
@@ -65,8 +79,25 @@
     if (!map) return;
     const pos = findSpawnLocation(scene, map, 0);
     if (!pos) return;
-    const kind = randomCaveEnemyKind();
-    const enemy = createEnemyInstance(kind, scene, pos);
+    const enemy = createEnemyInstance(randomCaveEnemyKind(), scene, pos);
+    Game.state.enemies.push(enemy);
+  }
+
+  function spawnCave2Enemy(scene) {
+    const map = Game.mapData[scene];
+    if (!map) return;
+    const pos = findSpawnLocation(scene, map, 0);
+    if (!pos) return;
+    const enemy = createEnemyInstance(randomCave2EnemyKind(), scene, pos);
+    Game.state.enemies.push(enemy);
+  }
+
+  function spawnRuinsEnemy(scene) {
+    const map = Game.mapData[scene];
+    if (!map) return;
+    const pos = findSpawnLocation(scene, map, 0);
+    if (!pos) return;
+    const enemy = createEnemyInstance(randomRuinsEnemyKind(), scene, pos);
     Game.state.enemies.push(enemy);
   }
 
@@ -74,19 +105,28 @@
     if (Game.combat.isActive()) return;
     spawnDragonIfNeeded();
     const scene = Game.state.scene;
-    const onField = scene === Game.SCENE.FIELD;
-    const onCaveFloor = isCaveScene(scene);
-    if (!onField && !onCaveFloor) {
+    const dungeonScenes = new Set([
+      Game.SCENE.CAVE,
+      Game.SCENE.CAVE_B2,
+      Game.SCENE.CAVE2,
+      Game.SCENE.CAVE2_B2,
+      Game.SCENE.RUINS,
+      Game.SCENE.RUINS_B2,
+    ]);
+    if (scene !== Game.SCENE.FIELD && !dungeonScenes.has(scene)) {
       Game.state.enemyRespawnSteps = 0;
       return;
     }
     Game.state.enemyRespawnSteps += 1;
     if (Game.state.enemyRespawnSteps >= RESPAWN_STEP_THRESHOLD) {
-      if (onField && countFieldNonDragon() < MAX_FIELD_ENEMIES) {
-        spawnFieldEnemy();
-      }
-      if (onCaveFloor && countEnemiesForScene(scene) < MAX_CAVE_ENEMIES) {
-        spawnCaveEnemy(scene);
+      if (scene === Game.SCENE.FIELD) {
+        ensureFieldEnemies();
+      } else if (scene === Game.SCENE.CAVE || scene === Game.SCENE.CAVE_B2) {
+        ensureCaveEnemies(scene);
+      } else if (scene === Game.SCENE.CAVE2 || scene === Game.SCENE.CAVE2_B2) {
+        ensureCave2Enemies(scene);
+      } else if (scene === Game.SCENE.RUINS || scene === Game.SCENE.RUINS_B2) {
+        ensureRuinsEnemies(scene);
       }
       Game.state.enemyRespawnSteps = 0;
     }
@@ -110,7 +150,16 @@
 
   function moveEnemiesTowardPlayer() {
     const scene = Game.state.scene;
-    if (scene !== Game.SCENE.FIELD && !isCaveScene(scene)) return;
+    const chaseScenes = new Set([
+      Game.SCENE.FIELD,
+      Game.SCENE.CAVE,
+      Game.SCENE.CAVE_B2,
+      Game.SCENE.CAVE2,
+      Game.SCENE.CAVE2_B2,
+      Game.SCENE.RUINS,
+      Game.SCENE.RUINS_B2,
+    ]);
+    if (!chaseScenes.has(scene)) return;
     if (Game.combat.isActive()) return;
     const playerPos = Game.state.playerPos;
     const enemies = Game.state.enemies.filter(
@@ -150,8 +199,12 @@
 
   function spawnDragonIfNeeded() {
     if (Game.state.flags && Game.state.flags.dragonDefeated) return;
-    const pos = getDragonGuardPosition();
-    if (!pos) return;
+    const events = Game.EVENTS ? Game.EVENTS[DRAGON_SCENE] : null;
+    const pos =
+      (events && events.dragon) || {
+        x: Math.floor(Game.config.gridWidth / 2),
+        y: Math.floor(Game.config.gridHeight / 2),
+      };
     const exists = Game.state.enemies.some(
       (enemy) => enemy.scene === DRAGON_SCENE && enemy.kind === types.ENEMY_KIND.DRAGON
     );
@@ -218,52 +271,32 @@
     return true;
   }
 
-  function getDragonGuardPosition() {
-    if (!Game.EVENTS) return null;
-    const events = Game.EVENTS[DRAGON_SCENE];
-    if (!events || !events.ruins) return null;
-    return {
-      x: events.ruins.x,
-      y: Math.min(Game.config.gridHeight - 1, events.ruins.y + 1),
-    };
-  }
-
   function randomFieldEnemyKind() {
-    const pool = [
-      types.ENEMY_KIND.SLIME,
-      types.ENEMY_KIND.BAT,
-      types.ENEMY_KIND.SPIDER,
-    ];
+    const pool = [types.ENEMY_KIND.SLIME, types.ENEMY_KIND.BAT, types.ENEMY_KIND.SPIDER];
     return pool[Game.utils.randInt(0, pool.length - 1)];
   }
 
   function randomCaveEnemyKind() {
-    const pool = [
-      types.ENEMY_KIND.GHOST,
-      types.ENEMY_KIND.VAMPIRE,
-      types.ENEMY_KIND.TROLL,
-    ];
+    const pool = [types.ENEMY_KIND.GHOST, types.ENEMY_KIND.WOLF, types.ENEMY_KIND.SKELETON];
     return pool[Game.utils.randInt(0, pool.length - 1)];
   }
 
-  function countFieldNonDragon() {
-    return Game.state.enemies.filter(
-      (enemy) => enemy.scene === Game.SCENE.FIELD && enemy.kind !== types.ENEMY_KIND.DRAGON
-    ).length;
+  function randomCave2EnemyKind() {
+    const pool = [types.ENEMY_KIND.LIZARDMAN, types.ENEMY_KIND.VAMPIRE, types.ENEMY_KIND.TROLL];
+    return pool[Game.utils.randInt(0, pool.length - 1)];
   }
 
-  function countEnemiesForScene(scene) {
-    return Game.state.enemies.filter((enemy) => enemy.scene === scene).length;
-  }
-
-  function isCaveScene(scene) {
-    return scene === Game.SCENE.CAVE || scene === Game.SCENE.CAVE_B2;
+  function randomRuinsEnemyKind() {
+    const pool = [types.ENEMY_KIND.GOLEM, types.ENEMY_KIND.DARK_KNIGHT, types.ENEMY_KIND.REAPER];
+    return pool[Game.utils.randInt(0, pool.length - 1)];
   }
 
   Game.enemyDirector = {
     spawnInitialEnemies,
     ensureFieldEnemies,
     ensureCaveEnemies,
+    ensureCave2Enemies,
+    ensureRuinsEnemies,
     onPlayerStep,
     removeEnemyById,
     moveEnemiesTowardPlayer,

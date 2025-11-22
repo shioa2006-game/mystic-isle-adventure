@@ -137,7 +137,7 @@
   function spawnBlacksmithGuardians() {
     if (progressFlags.blacksmithRescued || progressFlags.blacksmithFreed) return;
     if (!Game.entities || typeof Game.entities.spawnFixedEnemy !== "function") return;
-    const vampireKind = getEnemyKindValue("VAMPIRE");
+    const vampireKind = getEnemyKindValue("WOLF");
     BLACKSMITH_GUARD_POSITIONS.forEach((pos) => {
       const exists = state.enemies.some(
         (enemy) =>
@@ -298,11 +298,11 @@
       enemy &&
       enemy.guardianKey != null &&
       enemy.scene === SCENE.CAVE_B2 &&
-      enemy.kind === getEnemyKindValue("VAMPIRE");
+      enemy.kind === getEnemyKindValue("WOLF");
     if (
       isGuardian ||
       (enemy.scene === SCENE.CAVE_B2 &&
-        enemy.kind === getEnemyKindValue("VAMPIRE") &&
+        enemy.kind === getEnemyKindValue("WOLF") &&
         BLACKSMITH_GUARD_POSITIONS.some((pos) => pos.x === enemy.pos.x && pos.y === enemy.pos.y))
     ) {
       handleBlacksmithGuardianDefeat(enemy);
@@ -383,6 +383,18 @@
       typeof Game.entities.ensureCaveEnemies === "function"
     ) {
       Game.entities.ensureCaveEnemies();
+    }
+    if (
+      (scene === SCENE.CAVE2 || scene === SCENE.CAVE2_B2) &&
+      typeof Game.entities.ensureCave2Enemies === "function"
+    ) {
+      Game.entities.ensureCave2Enemies(scene);
+    }
+    if (
+      (scene === SCENE.RUINS || scene === SCENE.RUINS_B2) &&
+      typeof Game.entities.ensureRuinsEnemies === "function"
+    ) {
+      Game.entities.ensureRuinsEnemies(scene);
     }
   }
 
@@ -491,41 +503,81 @@
        Game.combat.startBattle(occ.enemyRef);
        return;
      }
-     if (occ.warp && occ.warpData) {
-       switchScene(occ.warpData.targetScene, occ.warpData.targetSpawn);
-       return;
-     }
      if (occ.chest) {
        handleChestEvent(state.scene, x, y);
        return;
      }
-     if (occ.ruins) {
-       handleRuinsEvent(state.scene, x, y);
-     }
-   }
-
-   function handleChestEvent(scene, x, y) {
-     if (PlayerState.hasOpenedChest(progressFlags, scene, x, y)) {
-       pushMessage({ text: "宝箱はすでに開いている。" });
+     if (occ.warp && occ.warpData) {
+       if (occ.warpData.event === "CAVE2_ENTRANCE") {
+         handleCave2EntranceEvent(occ.warpData);
+         return;
+       }
+       if (occ.warpData.event === "RUINS_ENTRANCE") {
+         handleRuinsEntranceEvent(occ.warpData);
+         return;
+       }
+       switchScene(occ.warpData.targetScene, occ.warpData.targetSpawn);
        return;
      }
-     PlayerState.markChestOpened(progressFlags, scene, x, y);     pushMessage({ text: "古い宝箱は既に空っぽだった。" });
-     markOccupancyDirty();
-     ensureOccupancy();
    }
 
-  function handleRuinsEvent(scene, x, y) {
+  function handleChestEvent(scene, x, y) {
+    if (PlayerState.hasOpenedChest(progressFlags, scene, x, y)) {
+      pushMessage({ text: "宝箱は空だった。" });
+      return;
+    }
+    PlayerState.markChestOpened(progressFlags, scene, x, y);
+    const events = Game.EVENTS ? Game.EVENTS[scene] : null;
+    const reward =
+      events && Array.isArray(events.chests)
+        ? events.chests.find((pos) => pos.x === x && pos.y === y)
+        : null;
+    if (reward && reward.item) {
+      const result = forceAddStoryItem(reward.item);
+      if (reward.item === ITEM.HOLY_ORE) {
+        progressFlags.hasOre = true;
+      }
+      if (!result.success) {
+        pushMessage({ text: "インベントリに空きが必要だ。" });
+      } else if (result.replaced) {
+        pushMessage({ text: `${PlayerState.getItemName(reward.item)}を手に入れた（${result.replaced}と入れ替え）。` });
+      } else {
+        pushMessage({ text: `${PlayerState.getItemName(reward.item)}を手に入れた。` });
+      }
+    } else {
+      pushMessage({ text: "宝箱を開けた。" });
+    }
+    markOccupancyDirty();
+    ensureOccupancy();
+  }
+
+  function handleRuinsEntranceEvent(warpData) {
     if (!progressFlags.blacksmithRescued) {
-      pushMessage({ text: "鍛冶屋を救い出すまでは遺跡へ向かえない。" });
+      pushMessage({ text: "鍛冶屋を救出するまで遺跡には入れない。" });
       return;
     }
     if (!progressFlags.holySwordCreated || !progressFlags.hasHolyShield) {
-      pushMessage({ text: "聖剣と聖盾を揃えてから挑もう。" });
+      pushMessage({ text: "聖剣と聖盾が揃っていないと遺跡の結界は越えられない。" });
       return;
     }
-    pushMessage({ text: "遺跡の内部は現在制作中です。" });
+    switchScene(warpData.targetScene, warpData.targetSpawn);
   }
 
+  function handleCave2EntranceEvent(warpData) {
+    if (progressFlags.cave2Unlocked) {
+      switchScene(warpData.targetScene, warpData.targetSpawn);
+      return;
+    }
+    if (Game.story && typeof Game.story.consumePowerHammer === "function") {
+      const used = Game.story.consumePowerHammer();
+      if (used) {
+        pushMessage({ text: "力のハンマーで岩を破いた！" });
+        switchScene(warpData.targetScene, warpData.targetSpawn);
+        return;
+      }
+    }
+    pushMessage({ text: "岩が塞いでいる。力のハンマーが必要だ。" });
+  }
 
    function isInventoryFull() {
      return PlayerState.isInventoryFull(state.player);

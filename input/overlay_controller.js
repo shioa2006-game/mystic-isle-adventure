@@ -26,6 +26,9 @@
       case Game.ui.OVERLAY.SAVE_CONFIRM:
         handleSaveConfirmOverlayInput(keyValue, keyCode);
         break;
+      case Game.ui.OVERLAY.ENDING:
+        handleEndingOverlayInput(keyValue, keyCode);
+        break;
       default:
         break;
     }
@@ -131,6 +134,11 @@
         Game.saveSystem.cancelSave();
       }
     }
+  }
+
+  function handleEndingOverlayInput(keyValue, keyCode) {
+    // いずれかのキーでタイトルへ戻る
+    Game.resetForNewGame();
   }
 
   function useSelectedInventoryItem() {

@@ -2,7 +2,7 @@
   // セーブ/ロード処理と神父の祈りによる記録を管轄
   const Game = (window.Game = window.Game || {});
 
-  const STORAGE_KEY = "mia_save_v1";
+  const STORAGE_KEY = "mia_save_v2";
 
   const saveState = {
     available: false,
@@ -121,7 +121,7 @@
     const inventory = Array.isArray(player.inventory) ? [...player.inventory] : [];
     const equip = player.equip || {};
     const snapshot = {
-      version: 1,
+      version: 2,
       timestamp: Date.now(),
       scene: Game.state.scene,
       playerPos: { x: Game.state.playerPos.x, y: Game.state.playerPos.y },

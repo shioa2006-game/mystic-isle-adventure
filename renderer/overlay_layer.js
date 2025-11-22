@@ -1,5 +1,5 @@
 (function () {
-  // 各種オーバーレイの描画
+  // 画面オーバーレイの描画
   const Game = (window.Game = window.Game || {});
   const { overlayArea } = Game.rendererLayout;
   const { estimateWrappedLineCount } = Game.rendererUtils;
@@ -26,6 +26,9 @@
       case Game.ui.OVERLAY.SAVE_CONFIRM:
         drawSaveConfirmOverlay(p);
         break;
+      case Game.ui.OVERLAY.ENDING:
+        drawEndingOverlay(p);
+        break;
       default:
         break;
     }
@@ -51,7 +54,7 @@
     );
     let contentY = overlayArea.y + 72;
     if (!list.length) {
-      const empty = isSellMode ? "売却できる物がない。" : "購入できる物がない。";
+      const empty = isSellMode ? "売却できる物がない" : "購入できる物がない";
       p.text(empty, overlayArea.x + 16, contentY);
       return;
     }
@@ -198,7 +201,7 @@
     p.text(`Enemy: ${enemyName}`, textX, overlayArea.y + 18);
     p.textSize(16);
     p.text(`HP ${enemy.hp}/${enemy.maxHp}`, textX, overlayArea.y + 48);
-    p.text("A:攻撃  D:防御  R:逃走", textX, overlayArea.y + 72);
+    p.text("A:攻撃  D:防御  R:逃げる", textX, overlayArea.y + 72);
     const player = Game.state.player;
     const isLowHp = player.hp <= player.maxHp / 5;
     p.fill(isLowHp ? p.color(255, 100, 100) : 255);
@@ -274,27 +277,29 @@
     p.text("ESC: 閉じる", overlayArea.x + 16, overlayArea.y + overlayArea.height - 32);
   }
 
-  function drawClearOverlay(p = window) {
-    if (!Game.flags || !Game.flags.cleared) return;
+  function drawEndingOverlay(p = window) {
     p.push();
     p.noStroke();
-    p.fill(0, 220);
+    p.fill(0, 230);
     p.rect(0, 0, Game.config.canvasWidth, Game.config.canvasHeight);
     p.fill(255);
     p.textAlign(p.CENTER, p.CENTER);
-    p.textSize(30);
-    p.text("CONGRATULATIONS!", Game.config.canvasWidth / 2, Game.config.canvasHeight / 2 - 50);
+    p.textSize(28);
+    p.text("ENDING", Game.config.canvasWidth / 2, Game.config.canvasHeight / 2 - 140);
     p.textSize(18);
-    p.text(
-      "Ancient Key で遺跡の謎を解き明かした。Thanks for playing.",
-      Game.config.canvasWidth / 2,
-      Game.config.canvasHeight / 2
-    );
-    p.text(
-      "Enter: もう一度始める",
-      Game.config.canvasWidth / 2,
-      Game.config.canvasHeight / 2 + 40
-    );
+    const messages = [
+      "古代竜は光の粒子となって消えた…",
+      "島に平和が戻った。",
+      "王様「勇者よ、島を救ってくれてありがとう」",
+      "鍛冶屋「俺の剣が役に立ったようだな」",
+      "神父「神の祝福がありますように」",
+      "なにかキーを押してください",
+    ];
+    const startY = Game.config.canvasHeight / 2 - 80;
+    const lineH = 26;
+    messages.forEach((line, idx) => {
+      p.text(line, Game.config.canvasWidth / 2, startY + idx * lineH);
+    });
     p.pop();
   }
 
@@ -312,5 +317,4 @@
   Game.rendererLayers = Game.rendererLayers || {};
   Game.rendererLayers.drawOverlays = drawOverlays;
   Game.rendererLayers.drawBattleOverlay = drawBattleOverlay;
-  Game.rendererLayers.drawClearOverlay = drawClearOverlay;
 })();

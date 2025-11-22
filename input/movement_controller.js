@@ -6,7 +6,15 @@
     throw new Error("MovementController の初期化順序が不正です。");
   }
 
-  const hungerScenes = new Set([Game.SCENE.FIELD, Game.SCENE.CAVE, Game.SCENE.CAVE_B2]);
+  const hungerScenes = new Set([
+    Game.SCENE.FIELD,
+    Game.SCENE.CAVE,
+    Game.SCENE.CAVE_B2,
+    Game.SCENE.CAVE2,
+    Game.SCENE.CAVE2_B2,
+    Game.SCENE.RUINS,
+    Game.SCENE.RUINS_B2,
+  ]);
 
   const keyState = {
     pressed: {},

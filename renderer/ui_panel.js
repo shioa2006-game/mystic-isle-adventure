@@ -1,5 +1,5 @@
-﻿(function () {
-  // 下部パネルの描画
+(function () {
+  // サイドパネルの描画
   const Game = (window.Game = window.Game || {});
   const { layout } = Game.rendererLayout;
   const { estimateWrappedLineCount } = Game.rendererUtils;

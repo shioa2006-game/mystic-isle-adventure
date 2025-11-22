@@ -35,6 +35,8 @@
     spawnInitialEnemies: director.spawnInitialEnemies,
     ensureFieldEnemies: director.ensureFieldEnemies,
     ensureCaveEnemies: director.ensureCaveEnemies,
+    ensureCave2Enemies: director.ensureCave2Enemies,
+    ensureRuinsEnemies: director.ensureRuinsEnemies,
     onPlayerStep: director.onPlayerStep,
     removeEnemyById: director.removeEnemyById,
     moveEnemiesTowardPlayer: director.moveEnemiesTowardPlayer,

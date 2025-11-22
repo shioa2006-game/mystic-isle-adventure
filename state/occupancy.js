@@ -125,6 +125,25 @@
             reserved: true,
             ruins: true,
             warp: true,
+            warpData: {
+              event: "RUINS_ENTRANCE",
+              targetScene: pos.targetScene,
+              targetSpawn: pos.targetSpawn,
+            },
+          });
+          markEnemyRestrictedArea(pos.x, pos.y);
+        }
+        if (events.cave2Entrance) {
+          const pos = events.cave2Entrance;
+          occupyCell(pos.x, pos.y, {
+            layer: Game.LAYER.STATIC,
+            reserved: true,
+            warp: true,
+            warpData: {
+              event: "CAVE2_ENTRANCE",
+              targetScene: pos.targetScene,
+              targetSpawn: pos.targetSpawn,
+            },
           });
           markEnemyRestrictedArea(pos.x, pos.y);
         }

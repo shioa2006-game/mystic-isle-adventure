@@ -40,12 +40,17 @@
     uiState.saveConfirm.selection = 0;
   }
 
+  function resetEndingState() {
+    // エンディングは選択状態を持たない
+  }
+
   function resetAll() {
     uiState.overlay = null;
     resetShopState();
     resetInventoryState();
     resetTitleState();
     resetSaveConfirmState();
+    resetEndingState();
   }
 
   function openOverlay(type) {
@@ -61,6 +66,9 @@
     }
     if (type === Game.OVERLAY.SAVE_CONFIRM) {
       resetSaveConfirmState();
+    }
+    if (type === Game.OVERLAY.ENDING) {
+      resetEndingState();
     }
   }
 

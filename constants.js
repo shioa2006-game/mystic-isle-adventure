@@ -3,7 +3,7 @@
   const Game = (window.Game = window.Game || {});
 
   if (!Game.config) {
-    throw new Error("Game.config が未定義です。config.js を先に読み込んでください。");
+    throw new Error("Game.config が未定義です。config.js を先に読み込んでください");
   }
 
   const SCENE = Object.freeze({
@@ -11,6 +11,10 @@
     TOWN: "TOWN",
     CAVE: "CAVE",
     CAVE_B2: "CAVE_B2",
+    CAVE2: "CAVE2",
+    CAVE2_B2: "CAVE2_B2",
+    RUINS: "RUINS",
+    RUINS_B2: "RUINS_B2",
   });
 
   const TILE = Object.freeze({
@@ -59,8 +63,12 @@
   const sceneLabels = Object.freeze({
     [SCENE.FIELD]: "フィールド",
     [SCENE.TOWN]: "街",
-    [SCENE.CAVE]: "洞窟",
-    [SCENE.CAVE_B2]: "洞窟 地下2階",
+    [SCENE.CAVE]: "洞窟1層",
+    [SCENE.CAVE_B2]: "洞窟 地下",
+    [SCENE.CAVE2]: "洞窟2 1層",
+    [SCENE.CAVE2_B2]: "洞窟2 地下",
+    [SCENE.RUINS]: "遺跡1階",
+    [SCENE.RUINS_B2]: "遺跡2階",
   });
 
   const ITEM = Object.freeze({
@@ -89,6 +97,7 @@
     STATUS: "STATUS",
     INN: "INN",
     SAVE_CONFIRM: "SAVE_CONFIRM",
+    ENDING: "ENDING",
   });
 
   const LAYER = Object.freeze({
@@ -113,8 +122,6 @@
   const MAX_MESSAGES = 4;
 
   // レベルnに到達するために必要な累積経験値を計算
-  // 数式: 5 × n × (n - 1)
-  // 例: LV2=10, LV3=30, LV4=60, LV5=100, ..., LV10=450, LV99=48,510
   function getExpForLevel(level) {
     if (level <= 1) return 0;
     return 5 * level * (level - 1);

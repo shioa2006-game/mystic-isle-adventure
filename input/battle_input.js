@@ -1,5 +1,5 @@
 (function () {
-  // 戦闘コマンド入力を担当
+  // 戦闘コマンド入力をハンドリング
   const Game = (window.Game = window.Game || {});
 
   if (!Game.combat) {

@@ -6,18 +6,18 @@
     return !!Game.battle.active;
   }
 
- function startBattle(enemyInstance) {
-   if (!enemyInstance || Game.battle.active) return;
-   Game.battle.active = true;
-   const enemyName = enemyInstance.name || enemyInstance.kind;
-   Game.battle.enemy = {
-     instanceId: enemyInstance.id,
-     kind: enemyInstance.kind,
-     name: enemyName,
-     hp: enemyInstance.hp,
-     maxHp: enemyInstance.maxHp,
-     atk: enemyInstance.atk,
-     def: enemyInstance.def,
+  function startBattle(enemyInstance) {
+    if (!enemyInstance || Game.battle.active) return;
+    Game.battle.active = true;
+    const enemyName = enemyInstance.name || enemyInstance.kind;
+    Game.battle.enemy = {
+      instanceId: enemyInstance.id,
+      kind: enemyInstance.kind,
+      name: enemyName,
+      hp: enemyInstance.hp,
+      maxHp: enemyInstance.maxHp,
+      atk: enemyInstance.atk,
+      def: enemyInstance.def,
       exp: enemyInstance.exp,
       gold: enemyInstance.gold,
     };
@@ -25,14 +25,14 @@
     Game.battle.playerDefending = false;
     Game.battle.returnScene = Game.state.scene;
     Game.battle.returnPos = { ...Game.state.playerPos };
-   Game.pushMessage({
-     text: `${enemyName} があらわれた！`,
-     icon: {
-       type: "enemy",
-       kind: enemyInstance.kind,
-       label: enemyName,
-     },
-   });
+    Game.pushMessage({
+      text: `${enemyName} があらわれた！`,
+      icon: {
+        type: "enemy",
+        kind: enemyInstance.kind,
+        label: enemyName,
+      },
+    });
   }
 
   function playerAction(action) {
@@ -55,10 +55,17 @@
   function handlePlayerAttack() {
     const playerStats = Game.getPlayerEffectiveStats();
     const enemy = Game.battle.enemy;
+    const dragonKind = Game.entities ? Game.entities.ENEMY_KIND.DRAGON : "DRAGON";
+    if (enemy.kind === dragonKind && !(Game.flags && Game.flags.holySwordCreated)) {
+      Game.pushMessage({ text: "聖剣がないと竜に傷をつけられない！" });
+      Game.battle.turn = "ENEMY";
+      enemyTurn();
+      return;
+    }
     const variance = Game.utils.randInt(0, 2);
     const dmg = Math.max(1, playerStats.atk + variance - enemy.def);
     enemy.hp = Math.max(0, enemy.hp - dmg);
-   Game.pushMessage({ text: `攻撃！ ${dmg} ダメージを与えた。` });
+    Game.pushMessage({ text: `攻撃！${dmg} ダメージを与えた。` });
     if (enemy.hp <= 0) {
       handleVictory();
       return;
@@ -69,7 +76,7 @@
 
   function handlePlayerDefend() {
     Game.battle.playerDefending = true;
-   Game.pushMessage({ text: "身を固めた…" });
+    Game.pushMessage({ text: "身を固めた…" });
     Game.battle.turn = "ENEMY";
     enemyTurn();
   }
@@ -77,10 +84,10 @@
   function handlePlayerRun() {
     const success = Math.random() < 0.5;
     if (success) {
-     Game.pushMessage({ text: "うまく逃げ切った！" });
+      Game.pushMessage({ text: "うまく逃げ切った！" });
       endBattle();
     } else {
-     Game.pushMessage({ text: "逃げられなかった。" });
+      Game.pushMessage({ text: "逃げられなかった…" });
       Game.battle.turn = "ENEMY";
       enemyTurn();
     }
@@ -91,19 +98,25 @@
     const playerStats = Game.getPlayerEffectiveStats();
     const variance = Game.utils.randInt(0, 2);
     let dmg = Math.max(1, enemy.atk + variance - playerStats.def);
+    const dragonKind = Game.entities ? Game.entities.ENEMY_KIND.DRAGON : "DRAGON";
+    const lacksHolyShield = !(Game.flags && Game.flags.hasHolyShield);
+    if (enemy.kind === dragonKind && lacksHolyShield) {
+      dmg = Math.max(dmg * 2, dmg + 5);
+      Game.pushMessage({ text: "聖盾がないので竜の炎を防げなかった！" });
+    }
     if (Game.battle.playerDefending) {
       dmg = Math.ceil(dmg / 2);
     }
     Game.battle.playerDefending = false;
     Game.state.player.hp = Math.max(0, Game.state.player.hp - dmg);
-   Game.pushMessage({
-     text: `${enemy.name} の攻撃！ ${dmg} ダメージを受けた。`,
-     icon: {
-       type: "enemy",
-       kind: enemy.kind,
-       label: enemy.name,
-     },
-   });
+    Game.pushMessage({
+      text: `${enemy.name} の攻撃！${dmg} ダメージを受けた。`,
+      icon: {
+        type: "enemy",
+        kind: enemy.kind,
+        label: enemy.name,
+      },
+    });
     if (Game.state.player.hp <= 0) {
       handleDefeat();
       return;
@@ -115,20 +128,24 @@
     const enemy = Game.battle.enemy;
     Game.state.player.gold += enemy.gold;
     Game.grantExp(enemy.exp);
-   Game.pushMessage({ text: `勝利！ EXP +${enemy.exp} / Gold +${enemy.gold}` });
+    Game.pushMessage({ text: `勝利！EXP +${enemy.exp} / Gold +${enemy.gold}` });
 
-    // 1/2の確率でFood10をドロップ
-    if (Math.random() < 1/2) {
+    // 1/2の確率でFood+10
+    if (Math.random() < 0.5) {
       Game.state.player.food += 10;
       Game.pushMessage({ text: "Food+10を手に入れた" });
     }
 
     Game.entities.removeEnemyById(enemy.instanceId);
     endBattle();
+    const dragonKind = Game.entities ? Game.entities.ENEMY_KIND.DRAGON : "DRAGON";
+    if (enemy.kind === dragonKind && Game.ui && Game.ui.OVERLAY && Game.ui.OVERLAY.ENDING) {
+      Game.ui.open(Game.ui.OVERLAY.ENDING);
+    }
   }
 
   function handleDefeat() {
-   Game.pushMessage({ text: "倒れてしまった…" });
+    Game.pushMessage({ text: "倒れてしまった…" });
     Game.resetPlayerToSafePoint();
     endBattle();
   }
