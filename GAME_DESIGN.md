@@ -20,7 +20,7 @@
 
 **現在の実装範囲**:
 - シーン: FIELD, TOWN, CAVE（洞窟1のみ、現在は2層構造）
-- 敵: 13種類（SLIME, BAT, SPIDER, GHOST, WOLF, SKELETON, LIZARDMAN, VAMPIRE, TROLL, GOLEM, DARK_KNIGHT, REAPER, DRAGON）
+- 敵: 7種類（SLIME, BAT, SPIDER, GHOST, VAMPIRE, TROLL,DRAGON）
 - 装備: 剣1種（Bronze Sword）、盾1種（Wood Shield）
 - NPC: 王様、商人、宿屋
 - クリア条件: 遺跡到達（※新ストーリーでは聖剣・聖盾装備が必要）
