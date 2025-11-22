@@ -1,8 +1,6 @@
 # 開発中のメモ
 
-## NPCダイアログ・ストーリーフロー統合表
-
-### フェーズ別・NPC統合マトリックス表
+## フェーズ/NPC/メッセージ統合表
 
 | 項目 | フェーズ0<br>**START** | フェーズ1<br>**BLACKSMITH_RESCUED** | フェーズ2<br>**ORE_OBTAINED** | フェーズ3<br>**HOLY_SWORD_CREATED** | フェーズ4<br>**DRAGON_DEFEATED** |
 |:---|:---|:---|:---|:---|:---|
