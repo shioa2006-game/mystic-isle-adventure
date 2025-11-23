@@ -124,7 +124,7 @@
   // レベルnに到達するために必要な累積経験値を計算
   function getExpForLevel(level) {
     if (level <= 1) return 0;
-    return 5 * level * (level - 1);
+    return 7 * level * (level - 1);
   }
 
   Game.SCENE = SCENE;

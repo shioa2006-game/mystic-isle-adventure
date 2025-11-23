@@ -376,10 +376,10 @@
       const requiredExp = Game.getExpForLevel(nextLevel);
       if (player.exp < requiredExp) break;
       player.lv = nextLevel;
-      player.maxHp += 5;
-      if (player.lv % 2 === 0) {
+      player.maxHp += 3;
+      if (player.lv % 4 === 0) {
         player.atk += 1;
-      } else {
+      } else if (player.lv % 4 === 2) {
         player.def += 1;
       }
       leveled = true;
