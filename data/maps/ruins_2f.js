@@ -1,9 +1,9 @@
 (function () {
-  // 遺跡 地下2階 ASCIIマップ
+  // 遺跡 2階 ASCIIマップ
   const Game = (window.Game = window.Game || {});
   const sources = (Game.mapSources = Game.mapSources || {});
 
-  sources.RUINS_B2 = [
+  sources.RUINS_2F = [
     "w w w w w w w w w w w w w w w w w w w w w w w w",
     "w c c c c c c c c c c c y c c c c c c c c c c w",
     "w c c c c c c c c c c c c c c c c c c c c c c w",
