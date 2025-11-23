@@ -79,8 +79,12 @@
       const text = selected.detail;
       const width = overlayArea.width - 32;
       const lineCount = estimateWrappedLineCount(p, text, width);
-      p.text(text, overlayArea.x + 16, overlayArea.y + overlayArea.height - lineCount * 18 - 16, width);
+      p.text(text, overlayArea.x + 16, overlayArea.y + overlayArea.height - lineCount * 18 - 48, width);
     }
+    // 操作説明を下部に表示
+    p.fill(200);
+    p.textSize(14);
+    p.text("[B]:購入  [S]:売却  [↑↓]:選択  [Enter]:決定  [ESC]:閉じる", overlayArea.x + 16, overlayArea.y + overlayArea.height - 28);
   }
 
   function drawInventoryOverlay(p) {
@@ -116,11 +120,15 @@
     if (selectedId) {
       const meta = Game.ITEM_META[selectedId];
       if (meta && meta.detail) {
-        const detailY = overlayArea.y + overlayArea.height - 60;
+        const detailY = overlayArea.y + overlayArea.height - 78;
         p.fill(200);
         p.text(meta.detail, overlayArea.x + 20, detailY);
       }
     }
+    // 操作説明を下部に表示
+    p.fill(200);
+    p.textSize(14);
+    p.text("[U]:装備/使う  [↑↓]:選択  [I/ESC]:閉じる", overlayArea.x + 16, overlayArea.y + overlayArea.height - 28);
   }
 
   function drawStatusOverlay(p) {
@@ -142,6 +150,10 @@
     lines.forEach((line, idx) => {
       p.text(line, overlayArea.x + 16, overlayArea.y + 52 + idx * 24);
     });
+    // 操作説明を下部に表示
+    p.fill(200);
+    p.textSize(14);
+    p.text("[S/ESC]:閉じる", overlayArea.x + 16, overlayArea.y + overlayArea.height - 28);
   }
 
   function drawInnOverlay(p) {
@@ -201,7 +213,7 @@
     p.text(`Enemy: ${enemyName}`, textX, overlayArea.y + 18);
     p.textSize(16);
     p.text(`HP ${enemy.hp}/${enemy.maxHp}`, textX, overlayArea.y + 48);
-    p.text("A:攻撃  D:防御  R:逃げる", textX, overlayArea.y + 72);
+    p.text("[A]:攻撃  [D]:防御  [R]:逃げる", textX, overlayArea.y + 72);
     const player = Game.state.player;
     const isLowHp = player.hp <= player.maxHp / 5;
     p.fill(isLowHp ? p.color(255, 100, 100) : 255);
