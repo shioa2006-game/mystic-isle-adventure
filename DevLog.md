@@ -301,7 +301,6 @@ PHASE 4: DRAGON_DEFEATED (竜討伐)
 16. 竜を倒してゲームクリア！
 
 ---
-
 # ２．Mystic Isle Adventure -今後の追加開発
 ---
 ## 新しいゲームフロー
