@@ -1,26 +1,26 @@
 (function () {
-  // 遺跡 2階 ASCIIマップ
+  // 遺跡 3階 ASCIIマップ
   const Game = (window.Game = window.Game || {});
   const sources = (Game.mapSources = Game.mapSources || {});
 
-  sources.RUINS_2F = [
+  sources.RUINS_3F = [
   "w w w w w w w w w w w w w w w w w w w w w w w w",
-  "w c c c c c c c c c c c y c c c c c c c c c c w",
+  "w c c c c c c c c c s s s s c c c c c c c c c w",
+  "w c c c c c c c c c s f f s c c c c c c c c c w",
+  "w c c c c c c c c c s f f s c c c c c c c c c w",
+  "w c c c s w w s c c s c c s c c s w w s c c c w",
   "w c c c c c c c c c c c c c c c c c c c c c c w",
   "w c c c c c c c c c c c c c c c c c c c c c c w",
-  "w c c c s w w s c c s w w s c c s w w s c c c w",
   "w c c c c c c c c c c c c c c c c c c c c c c w",
-  "w c c c c c c c c c c c c c c c c c c c c c c w",
-  "w c c c c c c c c c c c c c c c c c c c c c c w",
-  "w c c c s w w s c c s w w s c c s w w s c c c w",
-  "w c c c c c c c c c w f f w c c c c c c c c c w",
-  "w c c c c c c c c c w f f d c c c c c c c c c w",
-  "w c c c c c c c c c w f f w c c c c c c c c c w",
   "w c c c s w w s w w s w w s w w s w w s c c c w",
   "w c c c c c c c c c c c c c c c c c c c c c c w",
   "w c c c c c c c c c c c c c c c c c c c c c c w",
   "w c c c c c c c c c c c c c c c c c c c c c c w",
-  "w c c c c c c c c c c c x c c c c c c c c c c w",
+  "w c c c s w w s c c s w w s c c s w w s c c c w",
+  "w c c c c c c c c c c c c c c c c c c c c c c w",
+  "w c c c c c c c c c c c c c c c c c c c c c c w",
+  "w c c c c c c c c c c c c c c c c c c c c c c w",
+  "w c c c c c c c c c c c y c c c c c c c c c c w",
   "w w w w w w w w w w w w w w w w w w w w w w w w",
   ];
 })();

@@ -6,8 +6,9 @@
     START: 0,
     BLACKSMITH_RESCUED: 1,
     ORE_OBTAINED: 2,
-    HOLY_SWORD_CREATED: 3,
-    DRAGON_DEFEATED: 4,// 将来の拡張用（現在はエンディング画面に直接遷移）
+    ANCIENT_SWORD_READY: 3,
+    HOLY_SWORD_CREATED: 4,
+    DRAGON_DEFEATED: 5, // 将来の拡張用（現在はエンディング画面に直接遷移）
   });
 
   const dialogueState = {
@@ -254,11 +255,19 @@
     }
     if (
       session.characterId === "blacksmith" &&
-      session.phase === STORY_PHASE.ORE_OBTAINED &&
+      session.phase === STORY_PHASE.ANCIENT_SWORD_READY &&
       Game.story &&
       typeof Game.story.tryForgeHolySword === "function"
     ) {
       Game.story.tryForgeHolySword();
+    }
+    if (
+      session.characterId === "king" &&
+      session.phase === STORY_PHASE.ORE_OBTAINED &&
+      Game.story &&
+      typeof Game.story.tryGiveAncientKey === "function"
+    ) {
+      Game.story.tryGiveAncientKey();
     }
     if (
       session.characterId === "king" &&
@@ -289,8 +298,9 @@
 
   function getCurrentPhase() {
     const story = Game.flags || {};
-    if (story.dragonDefeated) return STORY_PHASE.DRAGON_DEFEATED;// 将来の拡張用（現在はエンディング画面に直接遷移）
+    if (story.dragonDefeated) return STORY_PHASE.DRAGON_DEFEATED; // 将来の拡張用（現在はエンディング画面に直接遷移）
     if (story.holySwordCreated) return STORY_PHASE.HOLY_SWORD_CREATED;
+    if (story.hasAncientSword) return STORY_PHASE.ANCIENT_SWORD_READY;
     if (story.hasOre) return STORY_PHASE.ORE_OBTAINED;
     if (story.blacksmithRescued) return STORY_PHASE.BLACKSMITH_RESCUED;
     return STORY_PHASE.START;

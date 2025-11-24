@@ -86,7 +86,8 @@
   const CAVE2_RAW = ensureRawRows("CAVE2", "cave2_b1");
   const CAVE2_B2_RAW = ensureRawRows("CAVE2_B2", "cave2_b2");
   const RUINS_RAW = ensureRawRows("RUINS", "ruins_1f");
-  const RUINS_B2_RAW = ensureRawRows("RUINS_B2", "ruins_2f");
+  const RUINS_B2_RAW = ensureRawRows("RUINS_2F", "ruins_2f");
+  const RUINS_B3_RAW = ensureRawRows("RUINS_3F", "ruins_3f");
 
   const fieldTiles = createTiles(FIELD_RAW);
   const townTiles = createTiles(TOWN_RAW);
@@ -96,6 +97,7 @@
   const cave2B2Tiles = createTiles(CAVE2_B2_RAW);
   const ruinsTiles = createTiles(RUINS_RAW);
   const ruinsB2Tiles = createTiles(RUINS_B2_RAW);
+  const ruinsB3Tiles = createTiles(RUINS_B3_RAW);
 
   const fieldTownEntrances = findPositions(FIELD_RAW, "v");
   const fieldCaveEntrances = findPositions(FIELD_RAW, "h");
@@ -113,6 +115,8 @@
   const ruinsDownStairs = findPositions(RUINS_RAW, "y");
   const ruinsB2UpStairs = findPositions(RUINS_B2_RAW, "x");
   const ruinsB2DownStairs = findPositions(RUINS_B2_RAW, "y");
+  const ruinsB3UpStairs = findPositions(RUINS_B3_RAW, "x");
+  const ruinsB3DownStairs = findPositions(RUINS_B3_RAW, "y");
 
   const fieldTownEntry = pick(fieldTownEntrances, 0, { x: 10, y: 8 });
   const fieldCaveEntry = pick(fieldCaveEntrances, 0, { x: 18, y: 3 });
@@ -135,10 +139,24 @@
     y: Math.max(cave2Down.y - 1, 0),
   });
 
-  const ruinsEntryUp = { x: 12, y: 1 };
-  const ruinsDown = { x: 12, y: 1 };
-  const ruinsB2Entry = { x: 12, y: 1 };
-  const ruinsB2Down = pick(ruinsB2DownStairs, 0, { x: 12, y: 1 });
+  const ruinsEntryUp = pick(ruinsUpStairs, 0, { x: 12, y: 1 });
+  const ruinsDown = pick(
+    ruinsDownStairs,
+    0,
+    { x: ruinsEntryUp.x, y: Math.min(ruinsEntryUp.y + 1, Game.config.gridHeight - 1) }
+  );
+  const ruinsB2Entry = pick(ruinsB2UpStairs, 0, { x: ruinsEntryUp.x, y: Math.max(ruinsEntryUp.y + 1, 0) });
+  const ruinsB2Down = pick(
+    ruinsB2DownStairs,
+    0,
+    { x: ruinsB2Entry.x, y: Math.min(ruinsB2Entry.y + 1, Game.config.gridHeight - 1) }
+  );
+  const ruinsB3Entry = pick(ruinsB3UpStairs, 0, { x: ruinsB2Entry.x, y: Math.min(ruinsB2Entry.y + 5, Game.config.gridHeight - 2) });
+  const ruinsB3Down = pick(
+    ruinsB3DownStairs,
+    0,
+    { x: ruinsB3Entry.x, y: Math.max(ruinsB3Entry.y - 1, 0) }
+  );
   const ruinsFieldEntrances = [
     { x: 11, y: 17 },
     { x: 12, y: 17 },
@@ -196,8 +214,10 @@
 
   // 遺跡のスポーン位置は仕様で固定
   const ruinsSpawnFromField = { x: 12, y: 16 };
-  const ruinsSpawnFromLower = { x: 12, y: 2 };
-  const ruinsB2SpawnFromUpper = { x: 12, y: 2 };
+  const ruinsSpawnFromLower = { x: ruinsDown.x, y: ruinsDown.y };
+  const ruinsB2SpawnFromUpper = { x: ruinsB2Entry.x, y: ruinsB2Entry.y };
+  const ruinsB2SpawnFromLower = { x: ruinsB2Down.x, y: ruinsB2Down.y };
+  const ruinsB3SpawnFromUpper = { x: ruinsB3Entry.x, y: ruinsB3Entry.y };
 
   const townEntrances = [
     {
@@ -224,6 +244,7 @@
   const cave2B2ReservedTiles = collectReservedPositions(CAVE2_B2_RAW);
   const ruinsReservedTiles = collectReservedPositions(RUINS_RAW);
   const ruinsB2ReservedTiles = collectReservedPositions(RUINS_B2_RAW);
+  const ruinsB3ReservedTiles = collectReservedPositions(RUINS_B3_RAW);
 
   Game.mapData = {
     [scenes.FIELD]: {
@@ -381,12 +402,35 @@
       spawnPoints: {
         default: { x: ruinsB2SpawnFromUpper.x, y: ruinsB2SpawnFromUpper.y },
         fromUpper: { x: ruinsB2SpawnFromUpper.x, y: ruinsB2SpawnFromUpper.y },
+        fromLower: { x: ruinsB2SpawnFromLower.x, y: ruinsB2SpawnFromLower.y },
       },
       entrances: [
         {
           tile: F.STAIRS_DOWN,
           position: ruinsB2Down,
           targetScene: scenes.RUINS,
+          targetSpawn: "fromLower",
+        },
+        {
+          tile: F.STAIRS_UP,
+          position: ruinsB2Entry,
+          targetScene: scenes.RUINS_B3,
+          targetSpawn: "fromUpper",
+        },
+      ],
+    },
+    [scenes.RUINS_B3]: {
+      tiles: ruinsB3Tiles,
+      reservedTiles: ruinsB3ReservedTiles,
+      spawnPoints: {
+        default: { x: ruinsB3SpawnFromUpper.x, y: ruinsB3SpawnFromUpper.y },
+        fromUpper: { x: ruinsB3SpawnFromUpper.x, y: ruinsB3SpawnFromUpper.y },
+      },
+      entrances: [
+        {
+          tile: F.STAIRS_DOWN,
+          position: ruinsB3Down,
+          targetScene: scenes.RUINS_B2,
           targetSpawn: "fromLower",
         },
       ],
@@ -402,7 +446,11 @@
       chests: [{ x: 1, y: 1, item: Game.ITEM ? Game.ITEM.HOLY_ORE : "HOLY_ORE" }],
     },
     [scenes.RUINS_B2]: {
-      dragon: { x: 12, y: 15 },
+      chests: [{ x: 11, y: 10, item: Game.ITEM ? Game.ITEM.ANCIENT_SWORD : "ANCIENT_SWORD" }],
+      keyDoor: { x: 13, y: 10, event: "RUINS_KEY_DOOR" },
+    },
+    [scenes.RUINS_B3]: {
+      dragon: { x: 12, y: 2 },
     },
   };
 })();

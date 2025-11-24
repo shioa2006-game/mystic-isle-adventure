@@ -160,10 +160,15 @@
         hasHammer: false,
         cave2Unlocked: false,
         hasOre: false,
+        hasAncientKey: false,
+        hasAncientSword: false,
+        ancientDoorOpened: false,
+        ruins3Unlocked: false,
         holySwordCreated: false,
         hasHolyShield: false,
         dragonDefeated: false,
         openedChests: [],
+        ancientGuardians: [],
       };
     }
     return {
@@ -178,12 +183,19 @@
       hasHammer: !!flags.hasHammer,
       cave2Unlocked: !!flags.cave2Unlocked,
       hasOre: !!flags.hasOre,
+      hasAncientKey: !!flags.hasAncientKey,
+      hasAncientSword: !!flags.hasAncientSword,
+      ancientDoorOpened: !!flags.ancientDoorOpened,
+      ruins3Unlocked: !!flags.ruins3Unlocked,
       holySwordCreated: !!flags.holySwordCreated,
       hasHolyShield: !!flags.hasHolyShield,
       dragonDefeated: !!flags.dragonDefeated,
       openedChests: Array.isArray(flags.openedChests)
         ? flags.openedChests.slice()
         : Array.from(flags.openedChests || []),
+      ancientGuardians: Array.isArray(flags.ancientGuardians)
+        ? flags.ancientGuardians.slice()
+        : Array.from(flags.ancientGuardians || []),
     };
   }
 
@@ -281,6 +293,10 @@
     flags.hasHammer = !!raw.hasHammer;
     flags.cave2Unlocked = !!raw.cave2Unlocked;
     flags.hasOre = !!raw.hasOre;
+    flags.hasAncientKey = !!raw.hasAncientKey;
+    flags.hasAncientSword = !!raw.hasAncientSword;
+    flags.ancientDoorOpened = !!raw.ancientDoorOpened;
+    flags.ruins3Unlocked = !!raw.ruins3Unlocked;
     flags.holySwordCreated = !!raw.holySwordCreated;
     flags.hasHolyShield = !!raw.hasHolyShield;
     flags.dragonDefeated = !!raw.dragonDefeated;
@@ -299,6 +315,14 @@
     }
     if (Array.isArray(raw.blacksmithGuardians)) {
       raw.blacksmithGuardians.forEach((key) => flags.blacksmithGuardians.add(key));
+    }
+    if (!flags.ancientGuardians) {
+      flags.ancientGuardians = new Set();
+    } else {
+      flags.ancientGuardians.clear();
+    }
+    if (Array.isArray(raw.ancientGuardians)) {
+      raw.ancientGuardians.forEach((key) => flags.ancientGuardians.add(key));
     }
   }
 

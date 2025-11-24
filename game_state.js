@@ -12,12 +12,12 @@
      throw new Error("Game.ui が未定義です。state/ui_state.js の読み込み順序を確認してください。");
    }
 
-   if (!Game.playerState) {
-     throw new Error("Game.playerState ������`�ł��Bstate/player_state.js �̓ǂݍ��ݏ������m�F���Ă��������B");
-   }
-   if (!Game.occupancy) {
-     throw new Error("Game.occupancy ������`�ł��Bstate/occupancy.js �̓ǂݍ��ݏ������m�F���Ă��������B");
-   }
+  if (!Game.playerState) {
+    throw new Error("Game.playerState が未定義です。state/player_state.js の読み込みを確認してください。");
+  }
+  if (!Game.occupancy) {
+    throw new Error("Game.occupancy が未定義です。state/occupancy.js の読み込みを確認してください。");
+  }
 
    const config = Game.config;
    const SCENE = Game.SCENE;
@@ -67,6 +67,10 @@
   const BLACKSMITH_GUARD_POSITIONS = [
     { x: 2, y: 1 },
     { x: 1, y: 2 },
+  ];
+  const ANCIENT_GUARD_POSITIONS = [
+    { x: 10, y: 10 },
+    { x: 12, y: 10 },
   ];
 
   const progressFlags = PlayerState.createProgressFlags();
@@ -132,6 +136,7 @@
 
   function ensureStoryEnemies() {
     spawnBlacksmithGuardians();
+    spawnAncientGuardians();
   }
 
   function spawnBlacksmithGuardians() {
@@ -150,6 +155,28 @@
         Game.entities.spawnFixedEnemy(guardianKind, SCENE.CAVE_B2, pos, {
           persistent: true,
           guardianKey: guardianKey(pos),
+        });
+      }
+    });
+  }
+
+  function spawnAncientGuardians() {
+    if (!Game.entities || typeof Game.entities.spawnFixedEnemy !== "function") return;
+    const guardianKind = getEnemyKindValue("DARK_KNIGHT");
+    ANCIENT_GUARD_POSITIONS.forEach((pos) => {
+      const key = guardianKey(pos);
+      if (progressFlags.ancientGuardians && progressFlags.ancientGuardians.has(key)) return;
+      const exists = state.enemies.some(
+        (enemy) =>
+          enemy.scene === SCENE.RUINS_B2 &&
+          enemy.kind === guardianKind &&
+          enemy.pos.x === pos.x &&
+          enemy.pos.y === pos.y
+      );
+      if (!exists) {
+        Game.entities.spawnFixedEnemy(guardianKind, SCENE.RUINS_B2, pos, {
+          persistent: true,
+          guardianKey: key,
         });
       }
     });
@@ -202,40 +229,56 @@
     }
     progressFlags.hasHammer = true;
     if (result.replaced) {
-      pushMessage({ text: `${result.replaced}と入れ替えてPower Hammer を受け取った。` });
+      pushMessage({ text: `${result.replaced}と交換でPower Hammerを受け取った。` });
     } else {
-      pushMessage({ text: "Power Hammer を受け取った。" });
+      pushMessage({ text: "Power Hammerを受け取った。" });
+    }
+  }
+
+  function tryGiveAncientKey() {
+    if (!progressFlags.hasOre || progressFlags.hasAncientKey) return;
+    const result = forceAddStoryItem(ITEM.ANCIENT_KEY);
+    if (!result.success) {
+      pushMessage({ text: "インベントリの空きが必要だ。" });
+      return;
+    }
+    progressFlags.hasAncientKey = true;
+    pushMessage({ text: "古代の鍵を授かった！" });
+    if (result.replaced) {
+      pushMessage({ text: `${result.replaced}と交換で古代の鍵を受け取った。` });
     }
   }
 
   function tryForgeHolySword() {
     if (!progressFlags.hasOre || progressFlags.holySwordCreated) return;
     const player = state.player;
-    if (!PlayerState.hasItem(player, ITEM.IRON_SWORD)) {
-      pushMessage({ text: "鉄の剣を持っていないため、鍛冶が始められない。" });
+    if (!PlayerState.hasItem(player, ITEM.ANCIENT_SWORD)) {
+      pushMessage({ text: "古代の剣を持っていない。" });
       return;
     }
     if (!PlayerState.hasItem(player, ITEM.HOLY_ORE)) {
-      pushMessage({ text: "聖鉱石を所持していない。" });
-      progressFlags.hasOre = false;
+      pushMessage({ text: "聖鉱石を持っていない。" });
       return;
     }
-    PlayerState.removeItemById(player, ITEM.IRON_SWORD);
+    PlayerState.removeItemById(player, ITEM.ANCIENT_SWORD);
     PlayerState.removeItemById(player, ITEM.HOLY_ORE);
-    progressFlags.hasOre = false;
     const result = forceAddStoryItem(ITEM.HOLY_SWORD);
     if (!result.success) {
-      pushMessage({ text: "インベントリに空きが必要だ。" });
+      PlayerState.addItem(player, ITEM.ANCIENT_SWORD);
+      PlayerState.addItem(player, ITEM.HOLY_ORE);
+      pushMessage({ text: "インベントリの空きが必要だ。" });
       return;
     }
+    progressFlags.hasOre = false;
+    progressFlags.hasAncientSword = false;
     progressFlags.holySwordCreated = true;
-    pushMessage({ text: "鍛冶屋が聖剣を鍛え上げた！" });
+    pushMessage({ text: "聖剣が完成した！" });
     if (result.replaced) {
-      pushMessage({ text: `${result.replaced}と入れ替えて聖剣を受け取った。` });
+      pushMessage({ text: `${result.replaced}と交換で聖剣を受け取った。` });
     }
   }
 
-  function tryGrantHolyShield() {
+function tryGrantHolyShield() {
     if (!progressFlags.holySwordCreated || progressFlags.hasHolyShield) return;
     const result = forceAddStoryItem(ITEM.HOLY_SHIELD);
     if (!result.success) {
@@ -306,6 +349,16 @@
         BLACKSMITH_GUARD_POSITIONS.some((pos) => pos.x === enemy.pos.x && pos.y === enemy.pos.y))
     ) {
       handleBlacksmithGuardianDefeat(enemy);
+    }
+    if (
+      enemy.scene === SCENE.RUINS_B2 &&
+      enemy.kind === getEnemyKindValue("DARK_KNIGHT") &&
+      enemy.guardianKey
+    ) {
+      if (!progressFlags.ancientGuardians) {
+        progressFlags.ancientGuardians = new Set();
+      }
+      progressFlags.ancientGuardians.add(enemy.guardianKey);
     }
     if (enemy.kind === getEnemyKindValue("DRAGON")) {
       progressFlags.dragonDefeated = true;
@@ -508,6 +561,10 @@
        return;
      }
      if (occ.warp && occ.warpData) {
+       if (occ.warpData.event === "RUINS_KEY_DOOR") {
+         handleRuinsKeyDoorEvent(occ.warpData);
+         return;
+       }
        if (occ.warpData.event === "CAVE2_ENTRANCE") {
          handleCave2EntranceEvent(occ.warpData);
          return;
@@ -537,6 +594,9 @@
       if (reward.item === ITEM.HOLY_ORE) {
         progressFlags.hasOre = true;
       }
+      if (reward.item === ITEM.ANCIENT_SWORD) {
+        progressFlags.hasAncientSword = true;
+      }
       if (!result.success) {
         pushMessage({ text: "インベントリに空きが必要だ。" });
       } else if (result.replaced) {
@@ -554,6 +614,28 @@
   function handleRuinsEntranceEvent(warpData) {
     // 遺跡にはいつでも入れるが、聖剣・聖盾がないと竜を倒せない
     switchScene(warpData.targetScene, warpData.targetSpawn);
+  }
+
+  function handleRuinsKeyDoorEvent(warpData) {
+    if (progressFlags.ancientDoorOpened) {
+      return;
+    }
+    const hasKey =
+      progressFlags.hasAncientKey || PlayerState.hasItem(state.player, ITEM.ANCIENT_KEY);
+    if (!hasKey) {
+      pushMessage({ text: "鍵がなければ開かない……Ancient Key を探そう。" });
+      return;
+    }
+    if (!progressFlags.hasAncientKey && PlayerState.hasItem(state.player, ITEM.ANCIENT_KEY)) {
+      progressFlags.hasAncientKey = true;
+    }
+    PlayerState.removeItemById(state.player, ITEM.ANCIENT_KEY);
+    progressFlags.hasAncientKey = false;
+    progressFlags.ancientDoorOpened = true;
+    progressFlags.ruins3Unlocked = true;
+    pushMessage({ text: "鍵を使って扉を開けた！" });
+    markOccupancyDirty();
+    ensureOccupancy();
   }
 
   function handleCave2EntranceEvent(warpData) {
@@ -679,6 +761,7 @@
     onEnemyDefeated,
     finalizeBlacksmithRescue,
     tryGivePowerHammer,
+    tryGiveAncientKey,
     tryForgeHolySword,
     tryGrantHolyShield,
     canTalkToBlacksmith,

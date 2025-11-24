@@ -74,12 +74,20 @@
     const map =
       (typeof Game.getCurrentMap === "function" && Game.getCurrentMap()) ||
       (Game.mapData ? Game.mapData[state.scene] : null);
+    const events = Game.EVENTS ? Game.EVENTS[state.scene] : null;
 
     if (map) {
       for (let y = 0; y < config.gridHeight; y += 1) {
         for (let x = 0; x < config.gridWidth; x += 1) {
           const tileId = map.tiles[y][x];
-          const reserved = RESERVED_TILES.has(tileId);
+          const isKeyDoor =
+            events &&
+            events.keyDoor &&
+            events.keyDoor.x === x &&
+            events.keyDoor.y === y &&
+            Game.flags &&
+            Game.flags.ancientDoorOpened;
+          const reserved = RESERVED_TILES.has(tileId) && !isKeyDoor;
           occupyCell(x, y, { layer: Game.LAYER.FLOOR, tileId, reserved });
           if (reserved) {
             markEnemyRestrictedArea(x, y);
@@ -105,7 +113,6 @@
         });
       }
 
-      const events = Game.EVENTS ? Game.EVENTS[state.scene] : null;
       if (events) {
         if (Array.isArray(events.chests)) {
           events.chests.forEach((pos) => {
@@ -117,6 +124,23 @@
             });
             markEnemyRestrictedArea(pos.x, pos.y);
           });
+        }
+        if (events.keyDoor) {
+          const doorPos = events.keyDoor;
+          const opened = Game.flags && Game.flags.ancientDoorOpened;
+          if (!opened) {
+            occupyCell(doorPos.x, doorPos.y, {
+              layer: Game.LAYER.STATIC,
+              reserved: true,
+              warp: true,
+              warpData: {
+                event: "RUINS_KEY_DOOR",
+                x: doorPos.x,
+                y: doorPos.y,
+              },
+            });
+            markEnemyRestrictedArea(doorPos.x, doorPos.y);
+          }
         }
         if (events.ruins) {
           const pos = events.ruins;
@@ -228,23 +252,26 @@
       return { ok: false };
     }
     const occ = getOccupancy(x, y);
-    if (occ) {
-      if (occ.npc) {
-        return { ok: false, npc: true };
-      }
-      if (occ.enemy) {
-        return { ok: false, enemy: true, enemyRef: occ.enemyRef };
-      }
-      if (occ.chest || occ.ruins) {
-        return {
-          ok: true,
-          chest: occ.chest,
-          ruins: occ.ruins,
-          warp: occ.warp,
-          warpData: occ.warpData,
-        };
-      }
-      if (occ.reserved && !occ.warp) {
+      if (occ) {
+        if (occ.npc) {
+          return { ok: false, npc: true };
+        }
+        if (occ.enemy) {
+          return { ok: false, enemy: true, enemyRef: occ.enemyRef };
+        }
+        if (occ.warp && occ.warpData && occ.warpData.event === "RUINS_KEY_DOOR" && !(Game.flags && Game.flags.ancientDoorOpened)) {
+          return { ok: false, reserved: true, warp: true, warpData: occ.warpData };
+        }
+        if (occ.chest || occ.ruins) {
+          return {
+            ok: true,
+            chest: occ.chest,
+            ruins: occ.ruins,
+            warp: occ.warp,
+            warpData: occ.warpData,
+          };
+        }
+        if (occ.reserved && !occ.warp) {
         return {
           ok: false,
           reserved: occ.reserved,

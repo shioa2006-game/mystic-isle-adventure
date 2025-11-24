@@ -15,6 +15,7 @@
     CAVE2_B2: "CAVE2_B2",
     RUINS: "RUINS",
     RUINS_B2: "RUINS_B2",
+    RUINS_B3: "RUINS_B3",
   });
 
   const TILE = Object.freeze({
@@ -69,6 +70,7 @@
     [SCENE.CAVE2_B2]: "洞窟2 地下",
     [SCENE.RUINS]: "遺跡1階",
     [SCENE.RUINS_B2]: "遺跡2階",
+    [SCENE.RUINS_B3]: "遺跡3階",
   });
 
   const ITEM = Object.freeze({
@@ -77,6 +79,7 @@
     WOOD_SWORD: "WOOD_SWORD",
     BRONZE_SWORD: "BRONZE_SWORD",
     IRON_SWORD: "IRON_SWORD",
+    ANCIENT_SWORD: "ANCIENT_SWORD",
     HOLY_SWORD: "HOLY_SWORD",
     WOOD_SHIELD: "WOOD_SHIELD",
     BRONZE_SHIELD: "BRONZE_SHIELD",

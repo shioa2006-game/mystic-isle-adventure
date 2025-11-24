@@ -54,6 +54,15 @@
       category: ITEM_CATEGORY.WEAPON,
       equip: { slot: "weapon", atk: 6 },
     },
+    ANCIENT_SWORD: {
+      id: Game.ITEM.ANCIENT_SWORD,
+      name: "Ancient Sword",
+      detail: "ATK +8 / ??????",
+      price: 0,
+      category: ITEM_CATEGORY.WEAPON,
+      equip: { slot: "weapon", atk: 8 },
+      unsellable: true,
+    },
     HOLY_SWORD: {
       id: Game.ITEM.HOLY_SWORD,
       name: "Holy Sword",

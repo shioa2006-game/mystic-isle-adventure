@@ -18,7 +18,7 @@
     ENEMY_CHASE_DISTANCE = 7,
   } = rules;
 
-  const DRAGON_SCENE = Game.SCENE.RUINS_B2;
+  const DRAGON_SCENE = Game.SCENE.RUINS_B3;
 
   function spawnInitialEnemies() {
     Game.state.enemies = [];
@@ -111,7 +111,8 @@
       Game.SCENE.CAVE2,
       Game.SCENE.CAVE2_B2,
       Game.SCENE.RUINS,
-      Game.SCENE.RUINS_B2,
+       Game.SCENE.RUINS_B2,
+      Game.SCENE.RUINS_B3,
     ]);
     if (scene !== Game.SCENE.FIELD && !dungeonScenes.has(scene)) {
       Game.state.enemyRespawnSteps = 0;
@@ -157,7 +158,8 @@
       Game.SCENE.CAVE2,
       Game.SCENE.CAVE2_B2,
       Game.SCENE.RUINS,
-      Game.SCENE.RUINS_B2,
+       Game.SCENE.RUINS_B2,
+      Game.SCENE.RUINS_B3,
     ]);
     if (!chaseScenes.has(scene)) return;
     if (Game.combat.isActive()) return;

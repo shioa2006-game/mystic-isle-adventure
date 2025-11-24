@@ -52,9 +52,14 @@
       hasHammer: false,
       cave2Unlocked: false,
       hasOre: false,
+      hasAncientKey: false,
+      hasAncientSword: false,
+      ancientDoorOpened: false,
+      ruins3Unlocked: false,
       holySwordCreated: false,
       hasHolyShield: false,
       dragonDefeated: false,
+      ancientGuardians: new Set(),
     };
   }
 
@@ -67,6 +72,10 @@
     flags.hasHammer = false;
     flags.cave2Unlocked = false;
     flags.hasOre = false;
+    flags.hasAncientKey = false;
+    flags.hasAncientSword = false;
+    flags.ancientDoorOpened = false;
+    flags.ruins3Unlocked = false;
     flags.holySwordCreated = false;
     flags.hasHolyShield = false;
     flags.dragonDefeated = false;
@@ -79,6 +88,11 @@
       flags.blacksmithGuardians = new Set();
     } else {
       flags.blacksmithGuardians.clear();
+    }
+    if (!flags.ancientGuardians) {
+      flags.ancientGuardians = new Set();
+    } else {
+      flags.ancientGuardians.clear();
     }
   }
 
