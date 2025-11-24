@@ -305,7 +305,7 @@ PHASE 4: DRAGON_DEFEATED (竜討伐)
 
 #２．Mystic Isle Adventure -新しいゲームフロー
 
----
+
 
 ### フェーズの流れ（物語ベース）
 
