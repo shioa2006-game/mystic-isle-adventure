@@ -1,6 +1,5 @@
 #１．Mystic Isle Adventure -現在の実装内容
 ---
-
 ## ゲームストーリー遷移の全体像
 
 ### 4つのメインフェーズ
@@ -304,10 +303,9 @@ PHASE 4: DRAGON_DEFEATED (竜討伐)
 ---
 
 # ２．Mystic Isle Adventure -今後の追加開発
-
+---
 ## 新しいゲームフロー
 ---
-
 ### フェーズの流れ（物語ベース）
 
 1. **START**
