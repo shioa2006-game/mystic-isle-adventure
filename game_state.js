@@ -631,6 +631,10 @@ function tryGrantHolyShield() {
     progressFlags.ancientDoorOpened = true;
     progressFlags.ruins3Unlocked = true;
     pushMessage({ text: "鍵を使って扉を開けた！" });
+    // 扉のタイルに移動（1マス進む）
+    const doorX = warpData.x || 13;
+    const doorY = warpData.y || 10;
+    setPlayerPosition({ x: doorX, y: doorY });
     markOccupancyDirty();
     ensureOccupancy();
   }
