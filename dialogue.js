@@ -142,7 +142,11 @@
     const flags = Game.flags || {};
 
     // 鍛冶屋フェーズ1: 力のハンマー受け取り済み
-    if (characterId === "blacksmith" && phase === STORY_PHASE.BLACKSMITH_RESCUED && flags.hasHammer) {
+    if (
+      characterId === "blacksmith" &&
+      phase === STORY_PHASE.BLACKSMITH_RESCUED &&
+      (flags.hasHammer || flags.cave2Unlocked)
+    ) {
       return "1_after_hammer";
     }
 

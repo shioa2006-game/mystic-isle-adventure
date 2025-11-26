@@ -8,9 +8,11 @@
     Game.ITEM.WOOD_SWORD,
     Game.ITEM.BRONZE_SWORD,
     Game.ITEM.IRON_SWORD,
+    Game.ITEM.STEEL_SWORD,
     Game.ITEM.WOOD_SHIELD,
     Game.ITEM.BRONZE_SHIELD,
     Game.ITEM.IRON_SHIELD,
+    Game.ITEM.STEEL_SHIELD,
   ];
 
    function tryOpenShop() {

@@ -143,19 +143,19 @@
   const ruinsDown = pick(
     ruinsDownStairs,
     0,
-    { x: ruinsEntryUp.x, y: Math.min(ruinsEntryUp.y + 1, Game.config.gridHeight - 1) }
+    { x: ruinsEntryUp.x, y: ruinsEntryUp.y }
   );
-  const ruinsB2Entry = pick(ruinsB2UpStairs, 0, { x: ruinsEntryUp.x, y: Math.max(ruinsEntryUp.y + 1, 0) });
+  const ruinsB2Entry = pick(ruinsB2UpStairs, 0, { x: 12, y: 16 });
   const ruinsB2Down = pick(
     ruinsB2DownStairs,
     0,
-    { x: ruinsB2Entry.x, y: Math.min(ruinsB2Entry.y + 1, Game.config.gridHeight - 1) }
+    { x: 12, y: 1 }
   );
-  const ruinsB3Entry = pick(ruinsB3UpStairs, 0, { x: ruinsB2Entry.x, y: Math.min(ruinsB2Entry.y + 5, Game.config.gridHeight - 2) });
+  const ruinsB3Entry = pick(ruinsB3UpStairs, 0, { x: 12, y: 16 });
   const ruinsB3Down = pick(
     ruinsB3DownStairs,
     0,
-    { x: ruinsB3Entry.x, y: Math.max(ruinsB3Entry.y - 1, 0) }
+    { x: 12, y: 16 }
   );
   const ruinsFieldEntrances = [
     { x: 11, y: 17 },
@@ -212,12 +212,12 @@
     y: Math.max(cave2B2Entry.y - 1, 0),
   };
 
-  // 遺跡のスポーン位置は仕様で固定
+  // RUINS spawn positions fixed
   const ruinsSpawnFromField = { x: 12, y: 16 };
   const ruinsSpawnFromLower = { x: ruinsDown.x, y: ruinsDown.y };
-  const ruinsB2SpawnFromUpper = { x: ruinsB2Entry.x, y: ruinsB2Entry.y };
-  const ruinsB2SpawnFromLower = { x: ruinsB2Down.x, y: ruinsB2Down.y };
-  const ruinsB3SpawnFromUpper = { x: ruinsB3Entry.x, y: ruinsB3Entry.y };
+  const ruinsB2SpawnFromUpper = { x: ruinsB2Down.x, y: ruinsB2Down.y };
+  const ruinsB2SpawnFromLower = { x: ruinsB2Entry.x, y: ruinsB2Entry.y };
+  const ruinsB3SpawnFromUpper = { x: ruinsB3Down.x, y: ruinsB3Down.y };
 
   const townEntrances = [
     {

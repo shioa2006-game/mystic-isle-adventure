@@ -221,7 +221,7 @@
   }
 
   function tryGivePowerHammer() {
-    if (!progressFlags.blacksmithRescued || progressFlags.hasHammer) return;
+    if (!progressFlags.blacksmithRescued || progressFlags.hasHammer || progressFlags.cave2Unlocked) return;
     const result = forceAddStoryItem(ITEM.POWER_HAMMER);
     if (!result.success) {
       pushMessage({ text: "インベントリの空きが必要だ。" });
