@@ -128,17 +128,17 @@
         if (events.keyDoor) {
           const doorPos = events.keyDoor;
           const opened = Game.flags && Game.flags.ancientDoorOpened;
+          occupyCell(doorPos.x, doorPos.y, {
+            layer: Game.LAYER.STATIC,
+            reserved: !opened,
+            warp: !opened,
+            warpData: opened ? null : {
+              event: "RUINS_KEY_DOOR",
+              x: doorPos.x,
+              y: doorPos.y,
+            },
+          });
           if (!opened) {
-            occupyCell(doorPos.x, doorPos.y, {
-              layer: Game.LAYER.STATIC,
-              reserved: true,
-              warp: true,
-              warpData: {
-                event: "RUINS_KEY_DOOR",
-                x: doorPos.x,
-                y: doorPos.y,
-              },
-            });
             markEnemyRestrictedArea(doorPos.x, doorPos.y);
           }
         }
