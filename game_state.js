@@ -618,12 +618,8 @@ function tryGrantHolyShield() {
 
   function handleRuinsKeyDoorEvent(warpData) {
     if (progressFlags.ancientDoorOpened) {
-      // 扉が既に開いている場合は、プレイヤーを扉の位置に移動させる
-      const doorX = warpData.x || 13;
-      const doorY = warpData.y || 10;
-      setPlayerPosition({ x: doorX, y: doorY });
-      markOccupancyDirty();
-      ensureOccupancy();
+      // 扉が既に開いている場合は通過できる
+      switchScene(warpData.targetScene, warpData.targetSpawn);
       return;
     }
     const hasKey =
