@@ -42,6 +42,10 @@
     const isSellMode = state.mode === "SELL";
     const list = isSellMode ? sellOptions : buyOptions;
     const selection = Math.min(state.selection, Math.max(list.length - 1, 0));
+
+    // スクロール設定：一度に表示するアイテム数
+    const MAX_VISIBLE_ITEMS = 6;
+
     p.fill(255);
     p.textAlign(p.LEFT, p.TOP);
     p.textSize(18);
@@ -58,7 +62,18 @@
       p.text(empty, overlayArea.x + 16, contentY);
       return;
     }
-    list.forEach((entry, index) => {
+
+    // スクロールオフセットの計算
+    let scrollOffset = 0;
+    if (list.length > MAX_VISIBLE_ITEMS) {
+      // 選択位置が中央付近に来るように調整
+      scrollOffset = Math.max(0, Math.min(selection - Math.floor(MAX_VISIBLE_ITEMS / 2), list.length - MAX_VISIBLE_ITEMS));
+    }
+
+    const visibleList = list.slice(scrollOffset, scrollOffset + MAX_VISIBLE_ITEMS);
+
+    visibleList.forEach((entry, visibleIndex) => {
+      const index = scrollOffset + visibleIndex;
       const isSelected = index === selection;
       if (isSelected) {
         p.fill(40, 120, 200, 180);
@@ -72,6 +87,14 @@
       p.text(`${label}  ${price}`, overlayArea.x + 20, contentY);
       contentY += 28;
     });
+
+    // スクロール位置インジケーター（アイテムが多い場合のみ）
+    if (list.length > MAX_VISIBLE_ITEMS) {
+      p.fill(200);
+      p.textSize(14);
+      p.text(`${selection + 1}/${list.length}`, overlayArea.x + overlayArea.width - 60, overlayArea.y + 44);
+    }
+
     const selected = list[selection];
     if (selected && selected.detail) {
       p.fill(220);
@@ -91,6 +114,10 @@
     drawOverlayFrame(p);
     const inventory = Game.state.player.inventory;
     const selection = Game.ui.state.inventory.selection;
+
+    // スクロール設定：一度に表示するアイテム数
+    const MAX_VISIBLE_ITEMS = 7;
+
     p.fill(255);
     p.textAlign(p.LEFT, p.TOP);
     p.textSize(18);
@@ -100,8 +127,18 @@
       p.text("所持品は空だ。", overlayArea.x + 16, overlayArea.y + 56);
       return;
     }
+
+    // スクロールオフセットの計算
+    let scrollOffset = 0;
+    if (inventory.length > MAX_VISIBLE_ITEMS) {
+      scrollOffset = Math.max(0, Math.min(selection - Math.floor(MAX_VISIBLE_ITEMS / 2), inventory.length - MAX_VISIBLE_ITEMS));
+    }
+
+    const visibleInventory = inventory.slice(scrollOffset, scrollOffset + MAX_VISIBLE_ITEMS);
+
     let contentY = overlayArea.y + 52;
-    inventory.forEach((itemId, index) => {
+    visibleInventory.forEach((itemId, visibleIndex) => {
+      const index = scrollOffset + visibleIndex;
       const equippedMark = Game.isItemEquipped(index) ? " (装備中)" : "";
       const meta = Game.ITEM_META[itemId];
       const name = meta ? meta.name : itemId;
@@ -116,12 +153,21 @@
       p.text(`${name}${equippedMark}`, overlayArea.x + 20, contentY);
       contentY += 26;
     });
+
+    // スクロール位置インジケーター（アイテムが多い場合のみ）
+    if (inventory.length > MAX_VISIBLE_ITEMS) {
+      p.fill(200);
+      p.textSize(14);
+      p.text(`${selection + 1}/${inventory.length}`, overlayArea.x + overlayArea.width - 60, overlayArea.y + 16);
+    }
+
     const selectedId = inventory[Math.min(selection, inventory.length - 1)];
     if (selectedId) {
       const meta = Game.ITEM_META[selectedId];
       if (meta && meta.detail) {
         const detailY = overlayArea.y + overlayArea.height - 78;
         p.fill(200);
+        p.textSize(14);
         p.text(meta.detail, overlayArea.x + 20, detailY);
       }
     }
