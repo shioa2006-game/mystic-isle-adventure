@@ -30,9 +30,23 @@
     if (meta.layer != null && Game.LAYER && meta.layer >= existing.layer) {
       existing.layer = meta.layer;
     }
-    existing.reserved = existing.reserved || !!meta.reserved;
-    existing.warp = existing.warp || !!meta.warp;
-    if (meta.warpData) existing.warpData = meta.warpData;
+    // reserved と warp は明示的に指定された場合は上書きする（false に戻せるように）
+    if ('reserved' in meta) {
+      existing.reserved = !!meta.reserved;
+    } else if (!('reserved' in existing)) {
+      existing.reserved = false;
+    }
+    if ('warp' in meta) {
+      existing.warp = !!meta.warp;
+    } else if (!('warp' in existing)) {
+      existing.warp = false;
+    }
+    // warpData は null を設定できるように、in 演算子でチェック
+    if ('warpData' in meta) {
+      existing.warpData = meta.warpData;
+    } else if (!('warpData' in existing)) {
+      existing.warpData = null;
+    }
     existing.npc = existing.npc || !!meta.npc;
     existing.enemy = existing.enemy || !!meta.enemy;
     existing.chest = existing.chest || !!meta.chest;
