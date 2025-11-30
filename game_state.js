@@ -323,16 +323,18 @@ function tryGrantHolyShield() {
       index,
       price: PlayerState.getItemPrice(itemId),
       equipped: PlayerState.isItemEquipped(player, index),
+      storyLocked: PlayerState.isStoryLocked(itemId),
     }));
-    let candidates = entries.filter((entry) => !entry.equipped);
+    let candidates = entries.filter((entry) => !entry.storyLocked && !entry.equipped);
     if (!candidates.length) {
-      candidates = entries;
+      candidates = entries.filter((entry) => !entry.storyLocked);
     }
+    if (!candidates.length) return -1;
     candidates.sort((a, b) => {
       if (a.price !== b.price) return a.price - b.price;
       return a.index - b.index;
     });
-    return candidates.length ? candidates[0].index : -1;
+    return candidates[0].index;
   }
 
   function onEnemyDefeated(enemy) {
@@ -455,6 +457,9 @@ function tryGrantHolyShield() {
     const prevScene = state.scene;
     const map = Game.mapData ? Game.mapData[nextScene] : null;
     if (!map) return;
+    if (Game.controllers && Game.controllers.movement && Game.controllers.movement.clearKeys) {
+      Game.controllers.movement.clearKeys();
+    }
     const spawn = (map.spawnPoints && map.spawnPoints[spawnKey]) || map.spawnPoints.default;
     setPlayerPosition(spawn);
     state.scene = nextScene;

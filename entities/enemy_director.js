@@ -29,6 +29,7 @@
     ensureCave2Enemies(Game.SCENE.CAVE2_B2);
     ensureRuinsEnemies(Game.SCENE.RUINS);
     ensureRuinsEnemies(Game.SCENE.RUINS_B2);
+    ensureRuinsEnemies(Game.SCENE.RUINS_B3);
     spawnDragonIfNeeded();
   }
 
@@ -126,7 +127,11 @@
         ensureCaveEnemies(scene);
       } else if (scene === Game.SCENE.CAVE2 || scene === Game.SCENE.CAVE2_B2) {
         ensureCave2Enemies(scene);
-      } else if (scene === Game.SCENE.RUINS || scene === Game.SCENE.RUINS_B2) {
+      } else if (
+        scene === Game.SCENE.RUINS ||
+        scene === Game.SCENE.RUINS_B2 ||
+        scene === Game.SCENE.RUINS_B3
+      ) {
         ensureRuinsEnemies(scene);
       }
       Game.state.enemyRespawnSteps = 0;

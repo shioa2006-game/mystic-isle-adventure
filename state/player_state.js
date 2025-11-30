@@ -1,9 +1,9 @@
 (function () {
-  // プレイヤーと進行フラグ、所持品操作をまとめて管理
+  // プレイヤー状態と所持品操作、進行フラグをまとめて管理する
   const Game = (window.Game = window.Game || {});
 
   if (!Game.ITEM || !Game.ITEM_META) {
-    throw new Error("Game.ITEM / Game.ITEM_META が未定義です。constants.js の読み込み順序を確認してください。");
+    throw new Error("Game.ITEM / Game.ITEM_META が未定義です。constants.js の読み込み順を確認してください。");
   }
 
   const ITEM = Game.ITEM;
@@ -19,7 +19,13 @@
 
   function getItemName(itemId) {
     const meta = ITEM_META[itemId];
-    return meta ? meta.name : itemId || "？？？";
+    return meta ? meta.name : itemId || "不明なアイテム";
+  }
+
+  // ストーリー進行に必須なアイテムかを判定
+  function isStoryLocked(itemId) {
+    const data = getItemData(itemId);
+    return data && data.storyLocked === true;
   }
 
   function createDefaultPlayer() {
@@ -158,7 +164,7 @@
 
   function describeItem(itemId) {
     const meta = ITEM_META[itemId];
-    if (!meta) return "詳細は未登録です。";
+    if (!meta) return "詳細は未登録です";
     return `${meta.name} : ${meta.detail}`;
   }
 
@@ -182,14 +188,10 @@
   function buyItem(player, itemId) {
     const price = PRICE[itemId];
     if (price == null) {
-      return {
-        success: false,
-        reason: "UNAVAILABLE",
-        message: "この品はまだ扱っていません。",
-      };
+      return { success: false, reason: "UNAVAILABLE", message: "この品はまだ扱っていません" };
     }
     if (player.gold < price) {
-      return { success: false, reason: "GOLD", message: "Gold が足りません。" };
+      return { success: false, reason: "GOLD", message: "Gold が足りません" };
     }
     const itemInfo = getItemData(itemId);
     if (itemId === ITEM.FOOD10) {
@@ -199,7 +201,7 @@
       return { success: true, itemId, message: `Food が ${gain} 増えた。` };
     }
     if (isInventoryFull(player)) {
-      return { success: false, reason: "FULL", message: "インベントリに空きがありません。" };
+      return { success: false, reason: "FULL", message: "インベントリに空きがありません" };
     }
     addItem(player, itemId);
     player.gold -= price;
@@ -227,27 +229,15 @@
 
   function sellItem(player, index) {
     if (index < 0 || index >= player.inventory.length) {
-      return {
-        success: false,
-        reason: "EMPTY",
-        message: "その位置にはアイテムがない。",
-      };
+      return { success: false, reason: "EMPTY", message: "その位置にはアイテムがない" };
     }
     if (isItemEquipped(player, index)) {
-      return {
-        success: false,
-        reason: "EQUIPPED",
-        message: "装備中のアイテムは売却できない。",
-      };
+      return { success: false, reason: "EQUIPPED", message: "装備中のアイテムは売却できない" };
     }
     const itemId = player.inventory[index];
     const price = getSellPrice(itemId);
     if (price === 0) {
-      return {
-        success: false,
-        reason: "VALUE",
-        message: "このアイテムは売却できない。",
-      };
+      return { success: false, reason: "VALUE", message: "このアイテムは売却できない" };
     }
     removeItemByIndex(player, index);
     player.gold += price;
@@ -261,31 +251,16 @@
 
   function useItemByIndex(player, index) {
     if (index < 0 || index >= player.inventory.length) {
-      return {
-        success: false,
-        reason: "EMPTY",
-        message: "アイテムが選択されていない。",
-        consumed: false,
-      };
+      return { success: false, reason: "EMPTY", message: "アイテムが選択されていない", consumed: false };
     }
     const itemId = player.inventory[index];
     const itemData = getItemData(itemId);
     if (!itemData) {
-      return {
-        success: false,
-        reason: "UNKNOWN",
-        message: "よく分からないアイテムだ。",
-        consumed: false,
-      };
+      return { success: false, reason: "UNKNOWN", message: "よく分からないアイテムだ", consumed: false };
     }
     if (itemData.category === ITEM_CATEGORY.CONSUMABLE) {
       if (itemId === ITEM.FOOD10) {
-        return {
-          success: false,
-          reason: "DIRECT",
-          message: "Food は購入すると直接補充される。",
-          consumed: false,
-        };
+        return { success: false, reason: "DIRECT", message: "Food は購入すると直接補充される", consumed: false };
       }
       return consumeInventoryItem(player, index, itemId, itemData);
     }
@@ -295,24 +270,14 @@
     if (itemData.category === ITEM_CATEGORY.SHIELD) {
       return toggleEquipmentSlot(player, index, "shield", itemId);
     }
-    return {
-      success: false,
-      reason: "UNUSABLE",
-      message: "ここでは使えない。",
-      consumed: false,
-    };
+    return { success: false, reason: "UNUSABLE", message: "ここでは使えない", consumed: false };
   }
 
   function consumeInventoryItem(player, index, itemId, itemData) {
     const effect = itemData.consumableEffect || {};
     if (effect.hp) {
       if (player.hp >= player.maxHp) {
-        return {
-          success: false,
-          reason: "FULL_HP",
-          message: "HP はすでに最大だ。",
-          consumed: false,
-        };
+        return { success: false, reason: "FULL_HP", message: "HP はすでに最大だ", consumed: false };
       }
       const before = player.hp;
       player.hp = Math.min(player.maxHp, player.hp + effect.hp);
@@ -325,12 +290,7 @@
         consumed: true,
       };
     }
-    return {
-      success: false,
-      reason: "NO_EFFECT",
-      message: "効果を発揮できなかった。",
-      consumed: false,
-    };
+    return { success: false, reason: "NO_EFFECT", message: "効果を発揮できなかった", consumed: false };
   }
 
   function toggleEquipmentSlot(player, index, slot, itemId) {
@@ -338,28 +298,18 @@
     const itemName = getItemName(itemId);
     if (currentIndex === index) {
       player.equip[slot] = null;
-      return {
-        success: true,
-        itemId,
-        message: `${itemName} を外した。`,
-        consumed: false,
-      };
+      return { success: true, itemId, message: `${itemName} を外した。`, consumed: false };
     }
     if (currentIndex !== null) {
       return {
         success: false,
         reason: "SLOT_OCCUPIED",
-        message: slot === "weapon" ? "他の武器を装備中だ。" : "他の盾を装備中だ。",
+        message: slot === "weapon" ? "他の武器を装備中だ" : "他の盾を装備中だ",
         consumed: false,
       };
     }
     player.equip[slot] = index;
-    return {
-      success: true,
-      itemId,
-      message: `${itemName} を装備した。`,
-      consumed: false,
-    };
+    return { success: true, itemId, message: `${itemName} を装備した。`, consumed: false };
   }
 
   function getEffectiveStats(player) {
@@ -384,7 +334,7 @@
   function grantExp(player, amount, pushMessage) {
     player.exp += amount;
     let leveled = false;
-    const maxLevel = 99; // 最大レベル
+    const maxLevel = 99;
     while (player.lv < maxLevel) {
       const nextLevel = player.lv + 1;
       const requiredExp = Game.getExpForLevel(nextLevel);
@@ -416,6 +366,7 @@
     removeItemByIndex,
     describeItem,
     getItemName,
+    isStoryLocked,
     addFood,
     canBuy,
     buyItem,

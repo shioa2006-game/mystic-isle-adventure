@@ -23,6 +23,12 @@
     moveInterval: 8,
   };
 
+  function clearKeys() {
+    keyState.pressed = {};
+    keyState.lastPressed = null;
+    keyState.moveTimer = 0;
+  }
+
   function handleArrowPress(keyCode) {
     if (!isArrowKey(keyCode)) return false;
     keyState.pressed[keyCode] = true;
@@ -158,5 +164,6 @@
     handleArrowPress,
     handleKeyRelease,
     update,
+    clearKeys,
   };
 })();

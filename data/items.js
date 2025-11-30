@@ -1,9 +1,9 @@
 (function () {
-  // アイテムのメタ情報と価格を一元管理
+  // アイテムのメタ情報と価格をまとめて定義する
   const Game = (window.Game = window.Game || {});
 
   if (!Game.ITEM) {
-    throw new Error("Game.ITEM が未定義のため、constants.js を先に読み込んでください。");
+    throw new Error("Game.ITEM が未定義のため、constants.js を先に読み込んでください");
   }
 
   const ITEM_CATEGORY = Object.freeze({
@@ -17,7 +17,7 @@
     FOOD10: {
       id: Game.ITEM.FOOD10,
       name: "Food 10",
-      detail: "Food を 10 回復",
+      detail: "Food が10 回復",
       price: 10,
       category: ITEM_CATEGORY.CONSUMABLE,
       foodGain: 10,
@@ -25,7 +25,7 @@
     POTION: {
       id: Game.ITEM.POTION,
       name: "Potion",
-      detail: "HP を 20 回復",
+      detail: "HP が20 回復",
       price: 15,
       category: ITEM_CATEGORY.CONSUMABLE,
       consumableEffect: { hp: 20 },
@@ -65,19 +65,21 @@
     ANCIENT_SWORD: {
       id: Game.ITEM.ANCIENT_SWORD,
       name: "Ancient Sword",
-      detail: "ATK +10 / ??????",
+      detail: "ATK +10 / 古代の力を秘めた剣",
       price: 0,
       category: ITEM_CATEGORY.WEAPON,
       equip: { slot: "weapon", atk: 10 },
       unsellable: true,
+      storyLocked: true,
     },
     HOLY_SWORD: {
       id: Game.ITEM.HOLY_SWORD,
       name: "Holy Sword",
-      detail: "ATK +10（鍛冶屋が錬成）",
+      detail: "ATK +10 / 鍛冶屋が錬成する聖剣",
       price: 0,
       category: ITEM_CATEGORY.WEAPON,
       equip: { slot: "weapon", atk: 10 },
+      storyLocked: true,
     },
     WOOD_SHIELD: {
       id: Game.ITEM.WOOD_SHIELD,
@@ -114,10 +116,11 @@
     HOLY_SHIELD: {
       id: Game.ITEM.HOLY_SHIELD,
       name: "Holy Shield",
-      detail: "DEF +10（王様から授与）",
+      detail: "DEF +10 / 王様から授与される聖盾",
       price: 0,
       category: ITEM_CATEGORY.SHIELD,
       equip: { slot: "shield", def: 10 },
+      storyLocked: true,
     },
     POWER_HAMMER: {
       id: Game.ITEM.POWER_HAMMER,
@@ -125,6 +128,7 @@
       detail: "岩を砕ける特別なハンマー",
       price: 0,
       category: ITEM_CATEGORY.STORY,
+      storyLocked: true,
     },
     HOLY_ORE: {
       id: Game.ITEM.HOLY_ORE,
@@ -132,6 +136,7 @@
       detail: "聖剣を鍛えるための素材",
       price: 0,
       category: ITEM_CATEGORY.STORY,
+      storyLocked: true,
     },
     ANCIENT_KEY: {
       id: Game.ITEM.ANCIENT_KEY,
@@ -139,6 +144,7 @@
       detail: "遺跡の扉を開く鍵",
       price: 0,
       category: ITEM_CATEGORY.STORY,
+      storyLocked: true,
     },
   });
 
