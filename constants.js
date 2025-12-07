@@ -92,7 +92,7 @@
     ANCIENT_KEY: "ANCIENT_KEY",
   });
 
-  const INVENTORY_MAX = 6;
+  const INVENTORY_MAX = 10;
   const FOOD_CAP = 999;
 
   const OVERLAY = Object.freeze({

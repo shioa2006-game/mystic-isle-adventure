@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   // 敵ごとの能力値をまとめて定義
   const Game = (window.Game = window.Game || {});
 
@@ -77,25 +77,25 @@
     },
     GOLEM: {
       name: "ゴーレム",
-      hp: [85, 100],
-      atk: [14, 17],
-      def: [7, 9],
+      hp: [72, 84],
+      atk: [12, 14],
+      def: [5, 7],
       exp: [40, 50],
       gold: [42, 50],
     },
     DARK_KNIGHT: {
       name: "ダークナイト",
-      hp: [90, 105],
-      atk: [15, 18],
-      def: [8, 10],
+      hp: [76, 90],
+      atk: [12, 15],
+      def: [6, 8],
       exp: [45, 55],
       gold: [48, 60],
     },
     REAPER: {
       name: "リーパー",
-      hp: [95, 110],
-      atk: [16, 20],
-      def: [9, 11],
+      hp: [82, 95],
+      atk: [13, 16],
+      def: [7, 9],
       exp: [50, 60],
       gold: [52, 65],
     },

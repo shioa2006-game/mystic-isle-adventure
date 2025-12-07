@@ -150,6 +150,11 @@
       return "1_after_hammer";
     }
 
+    // 王様フェーズ2: 古代の鍵を既に所持している場合は重複案内を避ける
+    if (characterId === "king" && phase === STORY_PHASE.ORE_OBTAINED && flags.hasAncientKey) {
+      return "2_after_key";
+    }
+
     // 王様フェーズ3: 聖盾受け取り済み
     if (characterId === "king" && phase === STORY_PHASE.HOLY_SWORD_CREATED && flags.hasHolyShield) {
       return "3_after_shield";
