@@ -69,8 +69,9 @@
     { x: 1, y: 2 },
   ];
   const ANCIENT_GUARD_POSITIONS = [
-    { x: 10, y: 10 },
-    { x: 12, y: 10 },
+    { x: 10, y: 10 },  // 宝箱の左
+    { x: 11, y: 9 },   // 宝箱の上
+    { x: 11, y: 11 },  // 宝箱の下
   ];
 
   const progressFlags = PlayerState.createProgressFlags();
