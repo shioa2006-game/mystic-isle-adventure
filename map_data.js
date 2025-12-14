@@ -188,28 +188,28 @@
   };
   const caveSpawnFromField = {
     x: caveExit.x,
-    y: Math.min(caveExit.y + 1, Game.config.gridHeight - 1),
+    y: caveExit.y,
   };
   const caveSpawnFromLower = {
     x: caveDown.x,
-    y: Math.max(caveDown.y - 1, 0),
+    y: caveDown.y,
   };
   const caveB2SpawnFromUpper = {
     x: caveB2Entry.x,
-    y: Math.max(caveB2Entry.y - 1, 0),
+    y: caveB2Entry.y,
   };
 
   const cave2SpawnFromField = {
     x: cave2Exit.x,
-    y: Math.min(cave2Exit.y + 1, Game.config.gridHeight - 1),
+    y: cave2Exit.y,
   };
   const cave2SpawnFromLower = {
     x: cave2Down.x,
-    y: Math.max(cave2Down.y - 1, 0),
+    y: cave2Down.y,
   };
   const cave2B2SpawnFromUpper = {
     x: cave2B2Entry.x,
-    y: Math.max(cave2B2Entry.y - 1, 0),
+    y: cave2B2Entry.y,
   };
 
   // RUINS spawn positions fixed
@@ -255,8 +255,8 @@
         fromTown: { x: fieldSpawnFromTownSouth.x, y: fieldSpawnFromTownSouth.y },
         fromTownSouth: { x: fieldSpawnFromTownSouth.x, y: fieldSpawnFromTownSouth.y },
         fromTownNorth: { x: fieldSpawnFromTownNorth.x, y: fieldSpawnFromTownNorth.y },
-        fromCave: { x: fieldCaveEntry.x, y: fieldCaveEntry.y + 1 },
-        fromCave2: { x: Math.max(fieldCave2Entry.x - 1, 0), y: fieldCave2Entry.y },
+        fromCave: { x: fieldCaveEntry.x, y: fieldCaveEntry.y },
+        fromCave2: { x: fieldCave2Entry.x, y: fieldCave2Entry.y },
         fromRuins: { x: fieldRuinsEntry.x, y: fieldRuinsEntry.y },
       },
       entrances: [
